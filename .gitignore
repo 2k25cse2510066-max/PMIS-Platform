@@ -1,0 +1,6 @@
+node_modules/
+dist/
+backend/data/pmis.db*
+backend/uploads/*
+!backend/uploads/.gitkeep
+.env

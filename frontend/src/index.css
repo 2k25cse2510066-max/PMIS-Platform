@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { @apply bg-paper text-ink font-sans antialiased; }
+
+::selection { background: #F5A742; color: #0F1B2B; }
+
+/* Focus ring visible for keyboard nav */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #E8912A;
+  outline-offset: 2px;
+}
+
+@layer components {
+  /* Ticket-stub card: a small notch cut into the top-left corner, like a form counterfoil */
+  .stub-card {
+    @apply relative bg-white border border-navy-100 rounded-card;
+    clip-path: polygon(0 14px, 14px 14px, 14px 0, 100% 0, 100% 100%, 0 100%);
+  }
+  .stub-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; width: 14px; height: 14px;
+    background: #F7F5EF;
+  }
+
+  /* Dashed government-form style divider */
+  .form-rule { border-top: 1.5px dashed #AFC7EB; }
+
+  /* Circular seal used for the overall match score */
+  .seal {
+    @apply relative flex items-center justify-center rounded-full border-[3px] border-navy-600 text-navy-700 font-mono font-semibold;
+    background: repeating-conic-gradient(#EEF3FB 0deg 2deg, transparent 2deg 12deg);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-card bg-navy-600 text-white px-5 py-2.5 font-medium
+           hover:bg-navy-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-card border border-navy-300 text-navy-700 px-5 py-2.5 font-medium
+           hover:bg-navy-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-saffron {
+    @apply inline-flex items-center justify-center gap-2 rounded-card bg-saffron-500 text-white px-5 py-2.5 font-medium
+           hover:bg-saffron-600 transition-colors disabled:opacity-50;
+  }
+  .input {
+    @apply w-full rounded-card border border-navy-200 bg-white px-3.5 py-2.5 text-ink placeholder:text-navy-300
+           focus:border-navy-500 focus:ring-1 focus:ring-navy-500 outline-none transition;
+  }
+  .label {
+    @apply block text-xs font-semibold uppercase tracking-wide text-navy-600 mb-1.5;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-navy-200 bg-navy-50 px-2.5 py-1 text-xs font-medium text-navy-700;
+  }
+  .chip-missing {
+    @apply inline-flex items-center rounded-full border border-saffron-400/50 bg-saffron-400/10 px-2.5 py-1 text-xs font-medium text-saffron-600;
+  }
+}
