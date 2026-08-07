@@ -53,7 +53,7 @@ You need Node.js 18+ installed.
 cd backend
 npm install
 npm run seed   # creates the SQLite DB and demo data (safe to re-run)
-npm run dev    # starts the API on http://localhost:5000
+npm run dev    # starts the API on http://https://pmis-platform-backend.onrender.com
 ```
 
 ### 2. Frontend (in a second terminal)
