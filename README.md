@@ -47,16 +47,46 @@ straightforward `better-sqlite3` → `pg` change in `backend/db.js`.)
 
 You need Node.js 18+ installed.
 
-### 1. Backend
+### 1. Configure the Gemini API Key (optional but recommended)
+
+The platform can use **Google Gemini** for AI-powered features like the
+chatbot, skill extraction, and resume improvement suggestions. Without a key
+the app still works — it falls back to the built-in rule-based NLP engine.
+
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey) and sign
+   in with your Google account.
+2. Click **Create API Key** and copy the generated key.
+3. In the `backend/` folder, create a **`.env`** file (this file is gitignored
+   and will never be committed):
+
+   ```bash
+   cd backend
+   cp .env.example .env        # Linux / macOS
+   copy .env.example .env      # Windows (CMD)
+   ```
+
+4. Open `backend/.env` and paste your key:
+
+   ```env
+   PORT=5000
+   JWT_SECRET=pmis-dev-secret-change-me
+   GEMINI_API_KEY=paste_your_actual_key_here
+   ```
+
+> **⚠️ Never commit your real API key.** The `.env` file is already listed in
+> `.gitignore`. Only `.env.example` (which contains a placeholder) is tracked
+> by git.
+
+### 2. Backend
 
 ```bash
 cd backend
 npm install
 npm run seed   # creates the SQLite DB and demo data (safe to re-run)
-npm run dev    # starts the API on http://https://pmis-platform-backend.onrender.com
+npm run dev    # starts the API on http://localhost:5000
 ```
 
-### 2. Frontend (in a second terminal)
+### 3. Frontend (in a second terminal)
 
 ```bash
 cd frontend
