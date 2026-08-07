@@ -7,19 +7,21 @@ export default {
         ink: '#0F1B2B',        // near-black navy for text/hero bg
         navy: {
           50: '#EEF3FB', 100: '#D7E3F5', 200: '#AFC7EB', 300: '#87ABE1',
-          500: '#1E4C8A', 600: '#173C6D', 700: '#122E54', 800: '#0F1B2B',
+          400: '#5F8FD7', 500: '#1E4C8A', 600: '#173C6D', 700: '#122E54', 800: '#0F1B2B',
         },
         saffron: {
-          400: '#F5A742', 500: '#E8912A', 600: '#C97418',
+          50: '#FFF8EE', 100: '#FFEFD5', 200: '#FFDBA8', 300: '#FFC574',
+          400: '#F5A742', 500: '#E8912A', 600: '#C97418', 700: '#A35C10', 800: '#7D460B',
         },
         leaf: {
-          400: '#3FA66B', 500: '#2C8C56', 600: '#1F6E42',
+          50: '#EEFBF3', 100: '#D4F5E1', 200: '#A8EBC3', 300: '#6FD99A',
+          400: '#3FA66B', 500: '#2C8C56', 600: '#1F6E42', 700: '#185733', 800: '#114226',
         },
         paper: '#F7F5EF',
       },
       fontFamily: {
         display: ['"Fraunces"', 'Georgia', 'serif'],
-        sans: ['"Inter"', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       },
       borderRadius: {

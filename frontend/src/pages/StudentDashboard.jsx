@@ -8,32 +8,71 @@ const TABS = ['Recommendations', 'Profile', 'Gap Analysis', 'Applications', 'Ass
 export default function StudentDashboard() {
   const [tab, setTab] = useState('Recommendations');
   const [profile, setProfile] = useState(null);
+  const [stats, setStats] = useState({ recommendationsCount: 0, appliedCount: 0 });
 
   const loadProfile = useCallback(() => {
     api.get('/student/profile').then((r) => setProfile(r.data));
+    api.get('/student/recommendations').then((r) => setStats((s) => ({ ...s, recommendationsCount: r.data.length })));
+    api.get('/student/applications').then((r) => setStats((s) => ({ ...s, appliedCount: r.data.length })));
   }, []);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-[#FAF8F5]">
       <Navbar />
-      <div className="max-w-6xl mx-auto px-5 py-8">
-        <h1 className="font-display text-3xl text-navy-800 mb-1">
-          {profile?.name ? `Welcome, ${profile.name.split(' ')[0]}` : 'Your dashboard'}
-        </h1>
-        <p className="text-navy-500 text-sm mb-6">Track matches, applications and skill gaps in one place.</p>
+      <div className="max-w-6xl mx-auto px-5 py-8 space-y-6">
+        {/* Hero Banner */}
+        <div className="glass-card p-6 border-navy-100/90 relative overflow-hidden bg-gradient-to-r from-navy-800 to-navy-700 text-white">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 text-white flex items-center justify-center font-display font-bold text-2xl shadow-inner">
+                {profile?.name ? profile.name[0] : 'S'}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight">
+                    {profile?.name ? `Welcome back, ${profile.name.split(' ')[0]}` : 'Your Allocation Dashboard'}
+                  </h1>
+                  {profile?.verified ? (
+                    <span className="bg-leaf-500/20 text-leaf-300 border border-leaf-400/30 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">✔ Verified</span>
+                  ) : null}
+                </div>
+                <p className="text-navy-100/80 text-sm mt-1">AI-powered internship matching, real-time application tracking, and skill gap analytics.</p>
+              </div>
+            </div>
 
-        <div className="flex gap-1 border-b border-navy-100 mb-6 overflow-x-auto">
+            {/* Quick Metrics */}
+            <div className="grid grid-cols-3 gap-3 shrink-0">
+              <div className="bg-white/10 backdrop-blur border border-white/10 rounded-xl px-4 py-2.5 text-center">
+                <div className="font-mono text-xl font-bold text-saffron-400">{stats.recommendationsCount}</div>
+                <div className="text-[10px] uppercase font-semibold tracking-wider text-navy-100">Top Matches</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur border border-white/10 rounded-xl px-4 py-2.5 text-center">
+                <div className="font-mono text-xl font-bold text-leaf-400">{stats.appliedCount}</div>
+                <div className="text-[10px] uppercase font-semibold tracking-wider text-navy-100">Applied</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur border border-white/10 rounded-xl px-4 py-2.5 text-center">
+                <div className="font-mono text-xl font-bold text-white">{(profile?.skills || []).length}</div>
+                <div className="text-[10px] uppercase font-semibold tracking-wider text-navy-100">Skills</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex gap-2 p-1.5 bg-white border border-navy-100 rounded-2xl shadow-sm overflow-x-auto">
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors ${
-                tab === t ? 'border-navy-600 text-navy-800' : 'border-transparent text-navy-400 hover:text-navy-600'
+              className={`px-5 py-2.5 text-sm font-semibold rounded-xl whitespace-nowrap transition-all duration-200 ${
+                tab === t
+                  ? 'bg-navy-600 text-white shadow-sm'
+                  : 'text-navy-600 hover:text-navy-800 hover:bg-navy-50'
               }`}
             >
-              {t}
+              {t === 'Assistant' ? '✨ AI Assistant' : t}
             </button>
           ))}
         </div>
@@ -53,6 +92,9 @@ function Recommendations() {
   const [items, setItems] = useState(null);
   const [applying, setApplying] = useState(null);
   const [expanded, setExpanded] = useState(null);
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('All');
+  const [minScore, setMinScore] = useState('0');
 
   const load = useCallback(() => { api.get('/student/recommendations').then((r) => setItems(r.data)); }, []);
   useEffect(() => { load(); }, [load]);
@@ -70,61 +112,114 @@ function Recommendations() {
   if (!items) return <SkeletonList />;
   if (items.length === 0) return <EmptyState text="No internships posted yet. Check back soon." />;
 
+  const filteredItems = items.filter((i) => {
+    const q = search.toLowerCase();
+    const matchesSearch =
+      i.title.toLowerCase().includes(q) ||
+      i.company_name.toLowerCase().includes(q) ||
+      i.location.toLowerCase().includes(q) ||
+      i.required_skills.some((s) => s.toLowerCase().includes(q));
+
+    const matchesType = typeFilter === 'All' || i.type === typeFilter;
+    const matchesScore = i.match.overall >= Number(minScore);
+
+    return matchesSearch && matchesType && matchesScore;
+  });
+
   return (
     <div className="space-y-4">
-      <p className="text-xs font-mono uppercase tracking-widest text-navy-400">Top {items.length} internships for you</p>
-      {items.map((i) => (
-        <div key={i.id} className="stub-card p-5">
-          <div className="flex items-start gap-4">
-            <MatchSeal score={i.match.overall} size={64} />
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-display text-xl text-navy-800">{i.title}</h3>
-                {i.company_verified ? <span className="chip">Verified employer</span> : <span className="chip-missing">Pending verification</span>}
-              </div>
-              <div className="text-sm text-navy-500 mt-0.5">{i.company_name} · {i.location} · {i.type} {i.stipend && `· ${i.stipend}`}</div>
-              <p className="text-sm text-navy-600 mt-2">{i.description}</p>
+      <div className="stub-card p-4 grid sm:grid-cols-3 gap-3">
+        <input
+          type="text"
+          placeholder="Search by title, skill, company..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="input text-xs"
+        />
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="input text-xs"
+        >
+          <option value="All">All Types (Remote / On-site / Hybrid)</option>
+          <option value="Remote">Remote</option>
+          <option value="On-site">On-site</option>
+          <option value="Hybrid">Hybrid</option>
+        </select>
+        <select
+          value={minScore}
+          onChange={(e) => setMinScore(e.target.value)}
+          className="input text-xs"
+        >
+          <option value="0">All Match Scores</option>
+          <option value="60">60%+ Match</option>
+          <option value="75">75%+ Match</option>
+          <option value="85">85%+ Match</option>
+        </select>
+      </div>
 
-              <div className="flex flex-wrap gap-1.5 mt-3">
-                {i.match.matchedSkills.map((s) => <span key={s} className="chip">{s}</span>)}
-                {i.match.missingSkills.map((s) => <span key={s} className="chip-missing">missing: {s}</span>)}
-              </div>
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-mono uppercase tracking-widest text-navy-400">
+          Showing {filteredItems.length} of {items.length} recommendations
+        </p>
+      </div>
 
-              <button
-                onClick={() => setExpanded(expanded === i.id ? null : i.id)}
-                className="text-xs text-navy-500 underline mt-3"
-              >
-                {expanded === i.id ? 'Hide match breakdown' : 'Why this recommendation?'}
-              </button>
-
-              {expanded === i.id && (
-                <div className="form-rule mt-3 pt-3 grid sm:grid-cols-2 gap-4">
-                  <div className="grid grid-cols-2 gap-y-1.5 text-sm font-mono">
-                    <span className="text-navy-400">Skill</span><span className="text-right">{i.match.breakdown.skill}%</span>
-                    <span className="text-navy-400">Location</span><span className="text-right">{i.match.breakdown.location}%</span>
-                    <span className="text-navy-400">Type</span><span className="text-right">{i.match.breakdown.type}%</span>
-                    <span className="text-navy-400">CGPA</span><span className="text-right">{i.match.breakdown.cgpa}%</span>
-                    <span className="text-navy-400">Projects</span><span className="text-right">{i.match.breakdown.projects}%</span>
-                  </div>
-                  <ul className="text-sm text-navy-600 space-y-1">
-                    {i.match.reasons.map((r, idx) => <li key={idx}>✔ {r}</li>)}
-                  </ul>
+      {filteredItems.length === 0 ? (
+        <EmptyState text="No internships match your filter criteria." />
+      ) : (
+        filteredItems.map((i) => (
+          <div key={i.id} className="stub-card p-5">
+            <div className="flex items-start gap-4">
+              <MatchSeal score={i.match.overall} size={64} />
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-display text-xl text-navy-800">{i.title}</h3>
+                  {i.company_verified ? <span className="chip">Verified employer</span> : <span className="chip-missing">Pending verification</span>}
                 </div>
-              )}
+                <div className="text-sm text-navy-500 mt-0.5">{i.company_name} · {i.location} · {i.type} {i.stipend && `· ${i.stipend}`}</div>
+                <p className="text-sm text-navy-600 mt-2">{i.description}</p>
 
-              <div className="mt-4">
-                {i.already_applied ? (
-                  <span className="text-sm text-leaf-600 font-medium">✔ Already applied</span>
-                ) : (
-                  <button className="btn-primary !px-4 !py-2 text-sm" disabled={applying === i.id} onClick={() => apply(i.id)}>
-                    {applying === i.id ? 'Applying…' : 'Apply now'}
-                  </button>
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {i.match.matchedSkills.map((s) => <span key={s} className="chip">{s}</span>)}
+                  {i.match.missingSkills.map((s) => <span key={s} className="chip-missing">missing: {s}</span>)}
+                </div>
+
+                <button
+                  onClick={() => setExpanded(expanded === i.id ? null : i.id)}
+                  className="text-xs text-navy-500 underline mt-3"
+                >
+                  {expanded === i.id ? 'Hide match breakdown' : 'Why this recommendation?'}
+                </button>
+
+                {expanded === i.id && (
+                  <div className="form-rule mt-3 pt-3 grid sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-y-1.5 text-sm font-mono">
+                      <span className="text-navy-400">Skill</span><span className="text-right">{i.match.breakdown.skill}%</span>
+                      <span className="text-navy-400">Location</span><span className="text-right">{i.match.breakdown.location}%</span>
+                      <span className="text-navy-400">Type</span><span className="text-right">{i.match.breakdown.type}%</span>
+                      <span className="text-navy-400">CGPA</span><span className="text-right">{i.match.breakdown.cgpa}%</span>
+                      <span className="text-navy-400">Projects</span><span className="text-right">{i.match.breakdown.projects}%</span>
+                    </div>
+                    <ul className="text-sm text-navy-600 space-y-1">
+                      {i.match.reasons.map((r, idx) => <li key={idx}>✔ {r}</li>)}
+                    </ul>
+                  </div>
                 )}
+
+                <div className="mt-4">
+                  {i.already_applied ? (
+                    <span className="text-sm text-leaf-600 font-medium">✔ Already applied</span>
+                  ) : (
+                    <button className="btn-primary !px-4 !py-2 text-sm" disabled={applying === i.id} onClick={() => apply(i.id)}>
+                      {applying === i.id ? 'Applying…' : 'Apply now'}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 }
@@ -319,17 +414,14 @@ function Applications() {
 // ---------------------------------------------------------------------------
 function Assistant() {
   const [messages, setMessages] = useState([
-    { from: 'bot', text: "Hi! Ask me things like \"Best internships for me?\", \"What skills should I learn?\", or \"Why wasn't I selected for X?\"" },
+    { from: 'bot', text: "Hi! Ask me anything about your internship search, skill gaps, resume tips, or general knowledge!" },
   ]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
 
-  async function send(e) {
-    e.preventDefault();
-    if (!input.trim()) return;
-    const text = input;
+  async function sendMessage(text) {
+    if (!text || !text.trim()) return;
     setMessages((m) => [...m, { from: 'user', text }]);
-    setInput('');
     setSending(true);
     try {
       const { data } = await api.post('/student/chatbot', { message: text });
@@ -339,21 +431,75 @@ function Assistant() {
     }
   }
 
+  function send(e) {
+    e.preventDefault();
+    if (!input.trim() || sending) return;
+    const text = input;
+    setInput('');
+    sendMessage(text);
+  }
+
+  const promptChips = [
+    '✨ Best internships for me?',
+    '💡 What skills should I learn?',
+    '🎯 Technical interview tips',
+    '📄 My resume status',
+    '⚡ Who are you?'
+  ];
+
   return (
-    <div className="stub-card p-5 max-w-2xl">
-      <div className="font-display text-lg text-navy-800 mb-1">AI Assistant</div>
-      <p className="text-sm text-navy-500 mb-4">Guidance based on your live profile and application history.</p>
-      <div className="space-y-3 mb-4 max-h-96 overflow-y-auto pr-1">
+    <div className="glass-card p-6 max-w-3xl space-y-4">
+      <div className="flex items-center justify-between border-b pb-3">
+        <div>
+          <div className="font-display text-xl font-bold text-navy-800 flex items-center gap-2">
+            <span>✨ AI Career Assistant</span>
+            <span className="text-[10px] uppercase font-mono bg-saffron-100 text-saffron-700 px-2 py-0.5 rounded-md font-semibold">Generative LLM</span>
+          </div>
+          <p className="text-xs text-navy-500 mt-0.5">Live career guidance based on your student profile and application history.</p>
+        </div>
+      </div>
+
+      <div className="space-y-3 mb-4 max-h-[420px] overflow-y-auto pr-1">
         {messages.map((m, i) => (
-          <div key={i} className={`text-sm rounded-card px-3.5 py-2.5 max-w-[85%] ${m.from === 'bot' ? 'bg-navy-50 text-navy-700' : 'bg-navy-600 text-white ml-auto'}`}>
+          <div
+            key={i}
+            className={`text-sm rounded-2xl px-4 py-3 max-w-[85%] shadow-sm leading-relaxed ${
+              m.from === 'bot'
+                ? 'bg-navy-50/90 border border-navy-100/80 text-navy-800 rounded-tl-xs'
+                : 'bg-gradient-to-r from-navy-700 to-navy-600 text-white ml-auto rounded-tr-xs'
+            }`}
+          >
             {m.text}
           </div>
         ))}
-        {sending && <div className="text-sm text-navy-400 italic">thinking…</div>}
+        {sending && <div className="text-xs text-navy-400 font-mono italic animate-pulse">AI is thinking…</div>}
       </div>
-      <form onSubmit={send} className="flex gap-2">
-        <input className="input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask a question…" />
-        <button className="btn-primary shrink-0" disabled={sending}>Send</button>
+
+      {/* Prompt Chips */}
+      <div className="flex flex-wrap gap-1.5 pt-2">
+        {promptChips.map((chip, idx) => (
+          <button
+            key={idx}
+            type="button"
+            disabled={sending}
+            onClick={() => sendMessage(chip.replace(/^[✨💡🎯📄⚡]\s*/, ''))}
+            className="text-xs bg-navy-50 hover:bg-navy-100 text-navy-700 font-medium px-3 py-1.5 rounded-xl border border-navy-200/60 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+
+      <form onSubmit={send} className="flex gap-2 pt-2">
+        <input
+          className="input !rounded-xl text-sm"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask any question (e.g. 'What skills to learn?', 'Code a binary search', 'Interview tips')..."
+        />
+        <button className="btn-primary shrink-0 !rounded-xl !px-6" disabled={sending}>
+          {sending ? 'Sending…' : 'Send'}
+        </button>
       </form>
     </div>
   );

@@ -44,7 +44,7 @@ router.get('/internships/:id/applicants', (req, res) => {
   if (!internship) return res.status(404).json({ error: 'Internship not found' });
 
   const apps = db.prepare(`
-    SELECT a.*, s.name, s.location, s.cgpa, s.skills, s.projects, s.resume_filename
+    SELECT a.*, s.name, s.phone, s.location, s.cgpa, s.skills, s.projects, s.certificates, s.resume_filename, s.resume_text
     FROM applications a JOIN student_profiles s ON s.user_id = a.student_id
     WHERE a.internship_id = ?
   `).all(req.params.id);
@@ -53,17 +53,22 @@ router.get('/internships/:id/applicants', (req, res) => {
     const student = {
       skills: JSON.parse(a.skills || '[]'),
       projects: JSON.parse(a.projects || '[]'),
+      certificates: JSON.parse(a.certificates || '[]'),
       location: a.location,
       cgpa: a.cgpa,
+      resume_text: a.resume_text || '',
     };
     const match = computeMatch(student, { ...internship, required_skills: JSON.parse(internship.required_skills || '[]') });
     return {
       application_id: a.id,
       student_id: a.student_id,
       name: a.name,
+      phone: a.phone,
       location: a.location,
       cgpa: a.cgpa,
       skills: student.skills,
+      projects: student.projects,
+      certificates: student.certificates,
       resume_filename: a.resume_filename,
       status: a.status,
       applied_at: a.applied_at,

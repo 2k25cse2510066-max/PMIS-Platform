@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { nanoid } = require('nanoid');
 const db = require('../db');
-const { JWT_SECRET } = require('../middleware/auth');
+const { JWT_SECRET, requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -42,6 +42,11 @@ router.post('/login', (req, res) => {
   if (user.role === 'company') profile = db.prepare('SELECT * FROM company_profiles WHERE user_id = ?').get(user.id);
 
   res.json({ token, user: { id: user.id, email: user.email, role: user.role, name: profile?.name || null } });
+});
+
+router.get('/notifications', requireAuth, (req, res) => {
+  const rows = db.prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 20').all(req.user.id);
+  res.json(rows);
 });
 
 module.exports = router;

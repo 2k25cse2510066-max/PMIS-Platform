@@ -38,14 +38,13 @@ router.get('/profile', (req, res) => {
 router.put('/profile', (req, res) => {
   const { name, phone, location, preferred_type, cgpa, skills, projects, certificates } = req.body;
   db.prepare(`UPDATE student_profiles SET
-      name = COALESCE(?, name), phone = COALESCE(?, phone), location = COALESCE(?, location),
-      preferred_type = COALESCE(?, preferred_type), cgpa = COALESCE(?, cgpa),
-      skills = COALESCE(?, skills), projects = COALESCE(?, projects), certificates = COALESCE(?, certificates)
+      name = ?, phone = ?, location = ?, preferred_type = ?, cgpa = ?,
+      skills = ?, projects = ?, certificates = ?
     WHERE user_id = ?`).run(
-    name ?? null, phone ?? null, location ?? null, preferred_type ?? null, cgpa ?? null,
-    skills ? JSON.stringify(skills) : null,
-    projects ? JSON.stringify(projects) : null,
-    certificates ? JSON.stringify(certificates) : null,
+    name || null, phone || null, location || null, preferred_type || null, cgpa !== undefined && cgpa !== null ? Number(cgpa) : null,
+    JSON.stringify(skills || []),
+    JSON.stringify(projects || []),
+    JSON.stringify(certificates || []),
     req.user.id
   );
   res.json(loadProfile(req.user.id));
@@ -55,9 +54,17 @@ router.put('/profile', (req, res) => {
 router.post('/resume', upload.single('resume'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No resume file uploaded' });
   try {
-    const parsed = await parseResumeFile(req.file.path);
     const existing = loadProfile(req.user.id);
-    const mergedSkills = normalizeSkillList([...(existing.skills || []), ...parsed.skills]);
+    if (existing && existing.resume_filename) {
+      const oldPath = path.join(__dirname, '..', 'uploads', existing.resume_filename);
+      const fs = require('fs');
+      if (fs.existsSync(oldPath)) {
+        try { fs.unlinkSync(oldPath); } catch (_) {}
+      }
+    }
+
+    const parsed = await parseResumeFile(req.file.path);
+    const mergedSkills = normalizeSkillList([...(existing?.skills || []), ...parsed.skills]);
 
     db.prepare(`UPDATE student_profiles SET
         resume_filename = ?, resume_text = ?, skills = ?,
@@ -166,46 +173,39 @@ router.get('/notifications', (req, res) => {
   res.json(rows);
 });
 
-// AI Chatbot - simple rule-based assistant over the student's own data
-router.post('/chatbot', (req, res) => {
+const { generateLLMResponse } = require('../services/llmService');
+
+// AI Chatbot - Multi-Provider Generative LLM Engine
+router.post('/chatbot', async (req, res) => {
   const { message } = req.body;
-  const m = (message || '').toLowerCase();
   const profile = loadProfile(req.user.id);
-  let reply;
 
-  if (/why (was(n'?t)?|wasn t) i (selected|shortlisted|rejected)/.test(m) || /not selected|rejected/.test(m)) {
-    const rejected = db.prepare(`
-      SELECT a.*, i.title FROM applications a JOIN internships i ON i.id = a.internship_id
-      WHERE a.student_id = ? AND a.status = 'rejected' ORDER BY a.applied_at DESC LIMIT 1
-    `).get(req.user.id);
-    if (rejected) {
-      const breakdown = JSON.parse(rejected.match_breakdown || '{}');
-      reply = `For "${rejected.title}", your match score was ${rejected.match_score}%. `
-        + (breakdown.missingSkills?.length
-          ? `The main gap was missing skills: ${breakdown.missingSkills.join(', ')}. Consider building a small project with those.`
-          : 'It looks close on paper - selection may have come down to other applicants, interview performance, or limited seats.');
-    } else {
-      reply = "I don't see any rejected applications on your account yet. Once a company updates your status, I can explain the outcome.";
-    }
-  } else if (/best internship|recommend|suggest/.test(m)) {
-    const internships = db.prepare('SELECT i.*, c.name as company_name FROM internships i JOIN company_profiles c ON c.user_id = i.company_id').all();
-    const ranked = internships.map((i) => ({ i, match: computeMatch(profile, { ...i, required_skills: JSON.parse(i.required_skills || '[]') }) }))
-      .sort((a, b) => b.match.overall - a.match.overall).slice(0, 3);
-    reply = ranked.length
-      ? `Based on your profile, your top matches are: ${ranked.map((r) => `${r.i.title} at ${r.i.company_name} (${r.match.overall}%)`).join('; ')}.`
-      : 'There are no internships posted yet - check back soon!';
-  } else if (/skill|learn|improve/.test(m)) {
-    const internships = db.prepare('SELECT required_skills FROM internships').all();
-    const demand = internships.flatMap((i) => JSON.parse(i.required_skills || '[]'));
-    const gaps = gapAnalysis(profile.skills, demand).filter((g) => !g.have).slice(0, 3);
-    reply = gaps.length
-      ? `The most in-demand skills you're missing right now are: ${gaps.map((g) => g.skill).join(', ')}. Adding a project using these would boost your match scores.`
-      : "You're covering the most in-demand skills well. Consider deepening one area with a capstone project.";
-  } else {
-    reply = "I can help with: 'Best internships for me?', 'What skills should I learn?', or 'Why wasn't I selected for X?'. Try asking one of those!";
+  const applications = db.prepare(`
+    SELECT a.status, a.match_score, i.title, c.name as company_name 
+    FROM applications a 
+    JOIN internships i ON i.id = a.internship_id 
+    JOIN company_profiles c ON c.user_id = i.company_id 
+    WHERE a.student_id = ?
+    ORDER BY a.applied_at DESC
+  `).all(req.user.id);
+
+  const internships = db.prepare('SELECT required_skills FROM internships').all();
+  const demand = internships.flatMap((i) => JSON.parse(i.required_skills || '[]'));
+  const gaps = gapAnalysis(profile.skills, demand);
+
+  try {
+    const reply = await generateLLMResponse({
+      message,
+      profile,
+      applications,
+      gapAnalysis: gaps,
+    });
+
+    res.json({ reply });
+  } catch (err) {
+    console.error('Chatbot LLM Error:', err);
+    res.status(500).json({ error: 'AI Assistant processing error' });
   }
-
-  res.json({ reply });
 });
 
 module.exports = router;

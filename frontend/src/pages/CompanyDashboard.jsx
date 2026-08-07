@@ -20,27 +20,45 @@ export default function CompanyDashboard() {
   useEffect(() => { loadAll(); }, []); // eslint-disable-line
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-[#FAF8F5]">
       <Navbar />
-      <div className="max-w-6xl mx-auto px-5 py-8">
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="font-display text-3xl text-navy-800">{profile?.name || 'Company dashboard'}</h1>
-          {profile?.verified ? <span className="chip">Verified employer</span> : <span className="chip-missing">Pending admin verification</span>}
+      <div className="max-w-6xl mx-auto px-5 py-8 space-y-6">
+        {/* Employer Hero Header */}
+        <div className="glass-card p-6 border-navy-100/90 relative overflow-hidden bg-gradient-to-r from-navy-800 to-navy-700 text-white">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 text-white flex items-center justify-center font-display font-bold text-2xl shadow-inner">
+                🏢
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight">{profile?.name || 'Company Portal'}</h1>
+                  {profile?.verified ? (
+                    <span className="bg-leaf-500/20 text-leaf-300 border border-leaf-400/30 text-xs font-semibold px-3 py-1 rounded-full">✔ Verified Employer</span>
+                  ) : (
+                    <span className="bg-saffron-500/20 text-saffron-300 border border-saffron-400/30 text-xs font-semibold px-3 py-1 rounded-full">Pending Verification</span>
+                  )}
+                </div>
+                <p className="text-navy-100/80 text-sm mt-1">Post internship seats, review candidate match breakdown, and manage status hiring pipelines.</p>
+              </div>
+            </div>
+
+            <button
+              className="btn-saffron text-sm !px-5 !py-2.5 shrink-0 shadow-md"
+              disabled={!profile?.verified}
+              onClick={() => setShowForm((s) => !s)}
+            >
+              {showForm ? 'Cancel Form' : '+ Post New Internship'}
+            </button>
+          </div>
         </div>
-        <p className="text-navy-500 text-sm mb-6">Post internships and let the engine rank applicants for you.</p>
 
         {!profile?.verified && (
-          <div className="stub-card p-4 mb-6 text-sm text-saffron-700 bg-saffron-50 border-saffron-200">
-            Your company is awaiting verification by an MCA admin. You can still preview the dashboard, but posting is disabled until then.
+          <div className="glass-card p-4 text-sm text-saffron-800 bg-saffron-50 border-saffron-200/80 flex items-center gap-3">
+            <span className="text-lg">⏳</span>
+            <span>Your company profile is undergoing verification by an MCA Admin. You can manage your draft postings below.</span>
           </div>
         )}
-
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-xl text-navy-800">Your postings</h2>
-          <button className="btn-saffron text-sm !px-4 !py-2" disabled={!profile?.verified} onClick={() => setShowForm((s) => !s)}>
-            {showForm ? 'Cancel' : '+ Post internship'}
-          </button>
-        </div>
 
         {showForm && <PostForm onCreated={() => { setShowForm(false); loadAll(); }} />}
 
@@ -120,6 +138,8 @@ function PostForm({ onCreated }) {
 function Applicants({ internshipId }) {
   const [apps, setApps] = useState(null);
   const [updating, setUpdating] = useState(null);
+  const [query, setQuery] = useState('');
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
 
   const load = useCallback(() => { api.get(`/company/internships/${internshipId}/applicants`).then((r) => setApps(r.data)); }, [internshipId]);
   useEffect(() => { setApps(null); load(); }, [load]);
@@ -129,6 +149,9 @@ function Applicants({ internshipId }) {
     try {
       await api.put(`/company/applications/${appId}/status`, { status });
       load();
+      if (selectedApplicant?.application_id === appId) {
+        setSelectedApplicant((prev) => prev ? { ...prev, status } : null);
+      }
     } finally {
       setUpdating(null);
     }
@@ -137,31 +160,128 @@ function Applicants({ internshipId }) {
   if (apps === null) return <SkeletonList />;
   if (apps.length === 0) return <EmptyState text="No applicants yet for this internship." />;
 
+  const filteredApps = apps.filter((a) => {
+    const q = query.toLowerCase();
+    return (
+      a.name?.toLowerCase().includes(q) ||
+      a.skills?.some((s) => s.toLowerCase().includes(q)) ||
+      a.location?.toLowerCase().includes(q)
+    );
+  });
+
   const statuses = ['applied', 'shortlisted', 'interview', 'offered', 'rejected'];
 
   return (
-    <div className="space-y-3">
-      <p className="text-xs font-mono uppercase tracking-widest text-navy-400">{apps.length} applicant{apps.length !== 1 && 's'} · ranked by match</p>
-      {apps.map((a) => (
-        <div key={a.application_id} className="stub-card p-4 flex items-center gap-4">
-          <MatchSeal score={a.match.overall} size={52} />
-          <div className="flex-1 min-w-0">
-            <div className="font-medium text-navy-800">{a.name}</div>
-            <div className="text-xs text-navy-400">{a.location || 'Location not set'} {a.cgpa ? `· CGPA ${a.cgpa}` : ''}</div>
-            <div className="flex flex-wrap gap-1 mt-1.5">
-              {a.match.matchedSkills.slice(0, 6).map((s) => <span key={s} className="chip">{s}</span>)}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs font-mono uppercase tracking-widest text-navy-400">
+          {filteredApps.length} applicant{filteredApps.length !== 1 && 's'} · ranked by match
+        </p>
+        <input
+          type="text"
+          placeholder="Filter applicants by name or skill..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="input !py-1 !px-3 text-xs !w-60"
+        />
+      </div>
+
+      {filteredApps.length === 0 ? (
+        <EmptyState text="No applicants match your filter query." />
+      ) : (
+        filteredApps.map((a) => (
+          <div key={a.application_id} className="stub-card p-4 flex items-center gap-4 hover:border-navy-300 transition-colors cursor-pointer" onClick={() => setSelectedApplicant(a)}>
+            <MatchSeal score={a.match.overall} size={52} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-navy-800 hover:underline">{a.name}</span>
+                {a.resume_filename && (
+                  <span className="text-[10px] bg-navy-50 text-navy-600 px-1.5 py-0.5 rounded font-mono">📄 Resume attached</span>
+                )}
+              </div>
+              <div className="text-xs text-navy-400">{a.location || 'Location not set'} {a.cgpa ? `· CGPA ${a.cgpa}` : ''} {a.phone ? `· ${a.phone}` : ''}</div>
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {a.match.matchedSkills.slice(0, 6).map((s) => <span key={s} className="chip">{s}</span>)}
+              </div>
+            </div>
+            <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+              <select
+                value={a.status}
+                disabled={updating === a.application_id}
+                onChange={(e) => updateStatus(a.application_id, e.target.value)}
+                className="input !w-auto text-sm capitalize"
+              >
+                {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
             </div>
           </div>
-          <select
-            value={a.status}
-            disabled={updating === a.application_id}
-            onChange={(e) => updateStatus(a.application_id, e.target.value)}
-            className="input !w-auto text-sm capitalize"
-          >
-            {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+        ))
+      )}
+
+      {selectedApplicant && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedApplicant(null)}>
+          <div className="bg-white rounded-card shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between border-b pb-3">
+              <div>
+                <h3 className="font-display text-2xl text-navy-800">{selectedApplicant.name}</h3>
+                <p className="text-sm text-navy-500">{selectedApplicant.location || 'Location not specified'} · Phone: {selectedApplicant.phone || 'N/A'}</p>
+              </div>
+              <button onClick={() => setSelectedApplicant(null)} className="text-navy-400 hover:text-navy-700 text-xl font-bold">×</button>
+            </div>
+
+            <div className="flex items-center gap-4 bg-navy-50 p-3 rounded-card">
+              <MatchSeal score={selectedApplicant.match.overall} size={56} />
+              <div>
+                <div className="font-display font-semibold text-navy-800">Match Score: {selectedApplicant.match.overall}%</div>
+                <div className="text-xs text-navy-600">
+                  Skill overlap: {selectedApplicant.match.breakdown.skill}% · CGPA: {selectedApplicant.cgpa || 'N/A'}
+                </div>
+              </div>
+            </div>
+
+            {selectedApplicant.resume_filename ? (
+              <div className="flex items-center justify-between bg-leaf-50 border border-leaf-200 p-3 rounded-card">
+                <span className="text-xs font-medium text-leaf-800">📄 PDF Resume Uploaded ({selectedApplicant.resume_filename})</span>
+                <a
+                  href={`/uploads/${selectedApplicant.resume_filename}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-primary text-xs !py-1.5 !px-3"
+                >
+                  View / Download Resume PDF
+                </a>
+              </div>
+            ) : (
+              <div className="text-xs text-navy-400 bg-navy-50 p-3 rounded-card">No PDF resume uploaded by candidate yet.</div>
+            )}
+
+            <div>
+              <h4 className="font-display text-sm font-semibold text-navy-800 mb-1">Skills</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedApplicant.skills.map((s) => <span key={s} className="chip">{s}</span>)}
+              </div>
+            </div>
+
+            {selectedApplicant.projects && selectedApplicant.projects.length > 0 && (
+              <div>
+                <h4 className="font-display text-sm font-semibold text-navy-800 mb-2">Projects</h4>
+                <div className="space-y-2">
+                  {selectedApplicant.projects.map((p, idx) => (
+                    <div key={idx} className="border border-navy-100 rounded-card p-3 text-sm">
+                      <div className="font-medium text-navy-800">{p.title}</div>
+                      <p className="text-xs text-navy-600 mt-1">{p.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="pt-3 border-t flex justify-end">
+              <button onClick={() => setSelectedApplicant(null)} className="btn-secondary text-sm">Close</button>
+            </div>
+          </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }
