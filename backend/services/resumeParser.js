@@ -1,4 +1,3 @@
-const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const { extractSkillsFromText } = require('./matching');
 
@@ -25,10 +24,10 @@ function guessCertifications(text) {
 }
 
 /**
- * "AI Resume Parser" - extracts structured fields + skills from an uploaded PDF resume.
+ * "AI Resume Parser" - extracts structured fields + skills from a PDF buffer.
+ * Works with in-memory buffers (serverless-compatible, no filesystem needed).
  */
-async function parseResumeFile(filepath) {
-  const buffer = fs.readFileSync(filepath);
+async function parseResumeBuffer(buffer) {
   const data = await pdfParse(buffer);
   const text = data.text || '';
 
@@ -42,4 +41,4 @@ async function parseResumeFile(filepath) {
   };
 }
 
-module.exports = { parseResumeFile };
+module.exports = { parseResumeBuffer };

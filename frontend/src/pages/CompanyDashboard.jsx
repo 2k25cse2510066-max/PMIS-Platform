@@ -242,14 +242,18 @@ function Applicants({ internshipId }) {
             {selectedApplicant.resume_filename ? (
               <div className="flex items-center justify-between bg-leaf-50 border border-leaf-200 p-3 rounded-card">
                 <span className="text-xs font-medium text-leaf-800">📄 PDF Resume Uploaded ({selectedApplicant.resume_filename})</span>
-                <a
-                  href={`/uploads/${selectedApplicant.resume_filename}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-primary text-xs !py-1.5 !px-3"
-                >
-                  View / Download Resume PDF
-                </a>
+                {selectedApplicant.resume_url ? (
+                  <a
+                    href={selectedApplicant.resume_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-primary text-xs !py-1.5 !px-3"
+                  >
+                    View / Download Resume PDF
+                  </a>
+                ) : (
+                  <span className="text-xs text-leaf-700">Resume link unavailable</span>
+                )}
               </div>
             ) : (
               <div className="text-xs text-navy-400 bg-navy-50 p-3 rounded-card">No PDF resume uploaded by candidate yet.</div>

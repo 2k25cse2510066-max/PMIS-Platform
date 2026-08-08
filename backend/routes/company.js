@@ -1,98 +1,201 @@
 const express = require('express');
 const { nanoid } = require('nanoid');
-const db = require('../db');
+const supabase = require('../db');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { computeMatch } = require('../services/matching');
 
 const router = express.Router();
 router.use(requireAuth, requireRole('company'));
 
-router.get('/profile', (req, res) => {
-  res.json(db.prepare('SELECT * FROM company_profiles WHERE user_id = ?').get(req.user.id));
+router.get('/profile', async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('company_profiles')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .maybeSingle();
+    res.json(data);
+  } catch (err) {
+    console.error('Company profile fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
 });
 
-router.put('/profile', (req, res) => {
-  const { name, description, website } = req.body;
-  db.prepare('UPDATE company_profiles SET name = COALESCE(?,name), description = COALESCE(?,description), website = COALESCE(?,website) WHERE user_id = ?')
-    .run(name ?? null, description ?? null, website ?? null, req.user.id);
-  res.json(db.prepare('SELECT * FROM company_profiles WHERE user_id = ?').get(req.user.id));
+router.put('/profile', async (req, res) => {
+  try {
+    const { name, description, website } = req.body;
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (website !== undefined) updates.website = website;
+
+    await supabase
+      .from('company_profiles')
+      .update(updates)
+      .eq('user_id', req.user.id);
+
+    const { data } = await supabase
+      .from('company_profiles')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .maybeSingle();
+    res.json(data);
+  } catch (err) {
+    console.error('Company profile update error:', err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
 });
 
-router.post('/internships', (req, res) => {
-  const company = db.prepare('SELECT * FROM company_profiles WHERE user_id = ?').get(req.user.id);
-  if (!company?.verified) return res.status(403).json({ error: 'Your company must be verified by an admin before posting internships' });
+router.post('/internships', async (req, res) => {
+  try {
+    const { data: company } = await supabase
+      .from('company_profiles')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .maybeSingle();
+    if (!company?.verified) return res.status(403).json({ error: 'Your company must be verified by an admin before posting internships' });
 
-  const { title, description, required_skills, location, type, seats, stipend } = req.body;
-  if (!title) return res.status(400).json({ error: 'Title is required' });
-  const id = nanoid();
-  db.prepare(`INSERT INTO internships (id, company_id, title, description, required_skills, location, type, seats, stipend)
-    VALUES (?,?,?,?,?,?,?,?,?)`).run(
-    id, req.user.id, title, description || '', JSON.stringify(required_skills || []),
-    location || '', type || 'On-site', seats || 1, stipend || ''
-  );
-  res.json(db.prepare('SELECT * FROM internships WHERE id = ?').get(id));
+    const { title, description, required_skills, location, type, seats, stipend } = req.body;
+    if (!title) return res.status(400).json({ error: 'Title is required' });
+    const id = nanoid();
+
+    await supabase.from('internships').insert({
+      id,
+      company_id: req.user.id,
+      title,
+      description: description || '',
+      required_skills: required_skills || [],
+      location: location || '',
+      type: type || 'On-site',
+      seats: seats || 1,
+      stipend: stipend || '',
+    });
+
+    const { data } = await supabase.from('internships').select('*').eq('id', id).maybeSingle();
+    res.json(data);
+  } catch (err) {
+    console.error('Post internship error:', err);
+    res.status(500).json({ error: 'Failed to post internship' });
+  }
 });
 
-router.get('/internships', (req, res) => {
-  const rows = db.prepare('SELECT * FROM internships WHERE company_id = ? ORDER BY created_at DESC').all(req.user.id);
-  res.json(rows.map((r) => ({ ...r, required_skills: JSON.parse(r.required_skills || '[]') })));
+router.get('/internships', async (req, res) => {
+  try {
+    const { data: rows } = await supabase
+      .from('internships')
+      .select('*')
+      .eq('company_id', req.user.id)
+      .order('created_at', { ascending: false });
+    res.json((rows || []).map((r) => ({ ...r, required_skills: r.required_skills || [] })));
+  } catch (err) {
+    console.error('Company internships error:', err);
+    res.status(500).json({ error: 'Failed to fetch internships' });
+  }
 });
 
 // AI ranking of applicants for a given internship
-router.get('/internships/:id/applicants', (req, res) => {
-  const internship = db.prepare('SELECT * FROM internships WHERE id = ? AND company_id = ?').get(req.params.id, req.user.id);
-  if (!internship) return res.status(404).json({ error: 'Internship not found' });
+router.get('/internships/:id/applicants', async (req, res) => {
+  try {
+    const { data: internship } = await supabase
+      .from('internships')
+      .select('*')
+      .eq('id', req.params.id)
+      .eq('company_id', req.user.id)
+      .maybeSingle();
+    if (!internship) return res.status(404).json({ error: 'Internship not found' });
 
-  const apps = db.prepare(`
-    SELECT a.*, s.name, s.phone, s.location, s.cgpa, s.skills, s.projects, s.certificates, s.resume_filename, s.resume_text
-    FROM applications a JOIN student_profiles s ON s.user_id = a.student_id
-    WHERE a.internship_id = ?
-  `).all(req.params.id);
+    const { data: apps } = await supabase
+      .from('applications')
+      .select('*')
+      .eq('internship_id', req.params.id);
 
-  const ranked = apps.map((a) => {
-    const student = {
-      skills: JSON.parse(a.skills || '[]'),
-      projects: JSON.parse(a.projects || '[]'),
-      certificates: JSON.parse(a.certificates || '[]'),
-      location: a.location,
-      cgpa: a.cgpa,
-      resume_text: a.resume_text || '',
-    };
-    const match = computeMatch(student, { ...internship, required_skills: JSON.parse(internship.required_skills || '[]') });
-    return {
-      application_id: a.id,
-      student_id: a.student_id,
-      name: a.name,
-      phone: a.phone,
-      location: a.location,
-      cgpa: a.cgpa,
-      skills: student.skills,
-      projects: student.projects,
-      certificates: student.certificates,
-      resume_filename: a.resume_filename,
-      status: a.status,
-      applied_at: a.applied_at,
-      match,
-    };
-  }).sort((x, y) => y.match.overall - x.match.overall);
+    const studentIds = [...new Set((apps || []).map((a) => a.student_id).filter(Boolean))];
+    const { data: students } = studentIds.length
+      ? await supabase.from('student_profiles').select('*').in('user_id', studentIds)
+      : { data: [] };
+    const studentsById = new Map((students || []).map((s) => [s.user_id, s]));
 
-  res.json(ranked);
+    const resumeFiles = (students || []).map((s) => s.resume_filename).filter(Boolean);
+    const resumeUrls = new Map();
+    for (const filename of resumeFiles) {
+      const { data } = await supabase.storage.from('resumes').createSignedUrl(filename, 60 * 60);
+      if (data?.signedUrl) resumeUrls.set(filename, data.signedUrl);
+    }
+
+    const ranked = (apps || []).map((a) => {
+      const s = studentsById.get(a.student_id) || {};
+      const student = {
+        skills: s.skills || [],
+        projects: s.projects || [],
+        certificates: s.certificates || [],
+        location: s.location,
+        cgpa: s.cgpa,
+        resume_text: s.resume_text || '',
+      };
+      const match = computeMatch(student, { ...internship, required_skills: internship.required_skills || [] });
+      return {
+        application_id: a.id,
+        student_id: a.student_id,
+        name: s.name,
+        phone: s.phone,
+        location: s.location,
+        cgpa: s.cgpa,
+        skills: student.skills,
+        projects: student.projects,
+        certificates: student.certificates,
+        resume_filename: s.resume_filename,
+        resume_url: s.resume_filename ? resumeUrls.get(s.resume_filename) || null : null,
+        status: a.status,
+        applied_at: a.applied_at,
+        match,
+      };
+    }).sort((x, y) => y.match.overall - x.match.overall);
+
+    res.json(ranked);
+  } catch (err) {
+    console.error('Applicants error:', err);
+    res.status(500).json({ error: 'Failed to fetch applicants' });
+  }
 });
 
-router.put('/applications/:id/status', (req, res) => {
-  const { status } = req.body;
-  if (!['applied', 'shortlisted', 'interview', 'offered', 'rejected'].includes(status)) {
-    return res.status(400).json({ error: 'Invalid status' });
-  }
-  const app = db.prepare(`
-    SELECT a.*, i.company_id, i.title FROM applications a JOIN internships i ON i.id = a.internship_id WHERE a.id = ?
-  `).get(req.params.id);
-  if (!app || app.company_id !== req.user.id) return res.status(404).json({ error: 'Application not found' });
+router.put('/applications/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['applied', 'shortlisted', 'interview', 'offered', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
 
-  db.prepare('UPDATE applications SET status = ? WHERE id = ?').run(status, req.params.id);
-  db.prepare('INSERT INTO notifications (id, user_id, message) VALUES (?,?,?)')
-    .run(nanoid(), app.student_id, `Your application for "${app.title}" is now: ${status}`);
-  res.json({ message: 'Status updated' });
+    // Get application with internship info
+    const { data: app } = await supabase
+      .from('applications')
+      .select('*')
+      .eq('id', req.params.id)
+      .maybeSingle();
+
+    const { data: internship } = app
+      ? await supabase.from('internships').select('company_id, title').eq('id', app.internship_id).maybeSingle()
+      : { data: null };
+
+    if (!app || internship?.company_id !== req.user.id) {
+      return res.status(404).json({ error: 'Application not found' });
+    }
+
+    await supabase
+      .from('applications')
+      .update({ status })
+      .eq('id', req.params.id);
+
+    await supabase.from('notifications').insert({
+      id: nanoid(),
+      user_id: app.student_id,
+      message: `Your application for "${internship?.title}" is now: ${status}`,
+    });
+
+    res.json({ message: 'Status updated' });
+  } catch (err) {
+    console.error('Status update error:', err);
+    res.status(500).json({ error: 'Failed to update status' });
+  }
 });
 
 module.exports = router;
