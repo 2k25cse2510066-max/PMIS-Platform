@@ -7,7 +7,8 @@ html {
 }
 
 body {
-  @apply bg-[#FAF8F5] text-ink font-sans antialiased selection:bg-saffron-400 selection:text-navy-800;
+  @apply bg-[#FAF8F5] text-ink font-sans antialiased selection:bg-saffron-400 selection:text-navy-800
+         dark:bg-navy-950 dark:text-navy-100 transition-colors duration-200;
 }
 
 /* Custom Scrollbar */
@@ -18,12 +19,21 @@ body {
 ::-webkit-scrollbar-track {
   background: #F1EFF7;
 }
+.dark ::-webkit-scrollbar-track {
+  background: #0B1524;
+}
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
   border-radius: 9999px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #1E3A5F;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3B82F6;
 }
 
 /* Focus ring visible for keyboard nav */
@@ -35,36 +45,42 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 @layer components {
   /* Glass & Premium Cards */
   .glass-nav {
-    @apply bg-white/85 backdrop-blur-md border-b border-navy-100/70 shadow-sm sticky top-0 z-30 transition-all;
+    @apply bg-white/85 dark:bg-navy-900/90 backdrop-blur-md border-b border-navy-100/70 dark:border-navy-800/80 shadow-sm sticky top-0 z-30 transition-all;
   }
   
   .stub-card {
-    @apply relative bg-white border border-navy-100/80 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200;
+    @apply relative bg-white dark:bg-navy-900 border border-navy-100/80 dark:border-navy-800/90 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-navy-800 dark:text-navy-100;
   }
 
   .glass-card {
-    @apply bg-white/90 backdrop-blur-sm border border-navy-100 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200;
+    @apply bg-white/90 dark:bg-navy-900/90 backdrop-blur-sm border border-navy-100 dark:border-navy-800/90 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-navy-800 dark:text-navy-100;
   }
 
   /* Government-style divider */
   .form-rule {
     border-top: 1.5px dashed #AFC7EB;
   }
+  .dark .form-rule {
+    border-top: 1.5px dashed #1E3A5F;
+  }
 
   /* Match Score Ring */
   .seal {
-    @apply relative flex items-center justify-center rounded-full border-[3px] border-navy-600 text-navy-800 font-mono font-bold shadow-sm;
+    @apply relative flex items-center justify-center rounded-full border-[3px] border-navy-600 dark:border-navy-400 text-navy-800 dark:text-navy-100 font-mono font-bold shadow-sm;
     background: repeating-conic-gradient(#EEF3FB 0deg 2deg, transparent 2deg 12deg);
+  }
+  .dark .seal {
+    background: repeating-conic-gradient(#122E54 0deg 2deg, transparent 2deg 12deg);
   }
 
   /* Premium Buttons */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-navy-600 text-white px-5 py-2.5 font-semibold text-sm
-           hover:bg-navy-700 active:scale-[0.99] shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-navy-600 dark:bg-navy-500 text-white px-5 py-2.5 font-semibold text-sm
+           hover:bg-navy-700 dark:hover:bg-navy-400 active:scale-[0.99] shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-navy-200 text-navy-700 bg-white px-5 py-2.5 font-semibold text-sm
-           hover:bg-navy-50 hover:border-navy-300 active:scale-[0.99] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-navy-200 dark:border-navy-700 text-navy-700 dark:text-navy-200 bg-white dark:bg-navy-800 px-5 py-2.5 font-semibold text-sm
+           hover:bg-navy-50 dark:hover:bg-navy-700 hover:border-navy-300 dark:hover:border-navy-600 active:scale-[0.99] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-saffron {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-saffron-500 text-white px-5 py-2.5 font-semibold text-sm
@@ -73,22 +89,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
   /* Form Controls */
   .input {
-    @apply w-full rounded-xl border border-navy-200 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-navy-300
-           focus:border-navy-500 focus:ring-2 focus:ring-navy-500/20 outline-none transition-all shadow-sm;
+    @apply w-full rounded-xl border border-navy-200 dark:border-navy-700 bg-white dark:bg-navy-950/80 px-4 py-2.5 text-sm text-ink dark:text-navy-100 placeholder:text-navy-300 dark:placeholder:text-navy-500
+           focus:border-navy-500 dark:focus:border-navy-400 focus:ring-2 focus:ring-navy-500/20 outline-none transition-all shadow-sm;
   }
   .label {
-    @apply block text-xs font-bold uppercase tracking-wider text-navy-600 mb-1.5;
+    @apply block text-xs font-bold uppercase tracking-wider text-navy-600 dark:text-navy-300 mb-1.5;
   }
 
   /* Badges & Chips */
   .chip {
-    @apply inline-flex items-center gap-1 rounded-lg border border-navy-200/80 bg-navy-50/80 px-2.5 py-1 text-xs font-semibold text-navy-700;
+    @apply inline-flex items-center gap-1 rounded-lg border border-navy-200/80 dark:border-navy-700/80 bg-navy-50/80 dark:bg-navy-800/80 px-2.5 py-1 text-xs font-semibold text-navy-700 dark:text-navy-200;
   }
   .chip-missing {
-    @apply inline-flex items-center gap-1 rounded-lg border border-saffron-400/50 bg-saffron-50 px-2.5 py-1 text-xs font-semibold text-saffron-700;
+    @apply inline-flex items-center gap-1 rounded-lg border border-saffron-400/50 dark:border-saffron-700/50 bg-saffron-50 dark:bg-saffron-950/40 px-2.5 py-1 text-xs font-semibold text-saffron-700 dark:text-saffron-300;
   }
 
   .stat-card {
-    @apply bg-white border border-navy-100/90 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all;
+    @apply bg-white dark:bg-navy-900 border border-navy-100/90 dark:border-navy-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all text-navy-800 dark:text-navy-100;
   }
 }
