@@ -5,20 +5,20 @@ export default function MatchSeal({ score, size = 60 }) {
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   let ringColor = '#10B981'; // Green
-  let bgGlow = 'rgba(16, 185, 129, 0.1)';
-  let label = 'Exceptional';
+  let bgGlow = 'rgba(16, 185, 129, 0.15)';
+  let label = 'Strong';
 
   if (score >= 80) {
-    ringColor = '#10B981'; // Green
-    bgGlow = 'rgba(16, 185, 129, 0.1)';
+    ringColor = '#10B981'; // Emerald Green
+    bgGlow = 'rgba(16, 185, 129, 0.15)';
     label = 'Strong';
   } else if (score >= 60) {
-    ringColor = '#173C6D'; // Navy
-    bgGlow = 'rgba(23, 60, 109, 0.1)';
+    ringColor = '#3B82F6'; // Bright Blue
+    bgGlow = 'rgba(59, 130, 246, 0.15)';
     label = 'Good';
   } else {
-    ringColor = '#E8912A'; // Saffron
-    bgGlow = 'rgba(232, 145, 42, 0.1)';
+    ringColor = '#F59E0B'; // Saffron/Amber
+    bgGlow = 'rgba(245, 158, 11, 0.15)';
     label = 'Stretch';
   }
 
@@ -33,7 +33,7 @@ export default function MatchSeal({ score, size = 60 }) {
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E2E8F0"
+          stroke="rgba(148, 163, 184, 0.25)"
           strokeWidth={strokeWidth}
           fill="transparent"
         />
@@ -51,7 +51,7 @@ export default function MatchSeal({ score, size = 60 }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-        <span className="font-mono font-bold text-navy-800" style={{ fontSize: size * 0.28 }}>
+        <span className="font-mono font-bold text-navy-800 dark:text-white" style={{ fontSize: Math.max(size * 0.26, 10) }}>
           {score}%
         </span>
       </div>
