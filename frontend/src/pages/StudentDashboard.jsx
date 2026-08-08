@@ -45,18 +45,18 @@ export default function StudentDashboard() {
         {/* Main Content Panel */}
         <main className="flex-1 min-w-0 space-y-6">
           {/* Welcome Banner Card */}
-          <div className="glass-panel p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-blue-900/40 via-indigo-900/40 to-purple-900/40 border-white/15">
+          <div className="glass-panel p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-blue-900/80 via-indigo-900/80 to-purple-900/80 text-white border-slate-200/90 dark:border-white/15">
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="space-y-2 max-w-xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-display font-bold text-xl shadow-lg border border-white/20">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-display font-black text-xl shadow-lg border border-white/20">
                     {profile?.name ? profile.name[0] : 'K'}
                   </div>
                   <div>
                     <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
                       Welcome back, {firstName}! 👋
                     </h1>
-                    <p className="text-xs text-indigo-200/80 mt-0.5">
+                    <p className="text-xs text-indigo-100/90 mt-0.5 font-medium">
                       AI-powered internship matching, real-time application tracking, and skill gap analytics.
                     </p>
                   </div>
@@ -65,35 +65,35 @@ export default function StudentDashboard() {
 
               {/* Statistics Cards */}
               <div className="grid grid-cols-3 gap-3 shrink-0">
-                <div className="glass-card p-3.5 text-center min-w-[100px] border-white/15 bg-white/10">
-                  <div className="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold">
+                <div className="glass-card p-3.5 text-center min-w-[100px] border-white/20 bg-white/10 text-white">
+                  <div className="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center text-sm font-bold">
                     💼
                   </div>
                   <div className="font-mono text-2xl font-black text-white">{stats.recommendationsCount || 3}</div>
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-300">Top Matches</div>
+                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-200">Top Matches</div>
                 </div>
 
-                <div className="glass-card p-3.5 text-center min-w-[100px] border-white/15 bg-white/10">
-                  <div className="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">
+                <div className="glass-card p-3.5 text-center min-w-[100px] border-white/20 bg-white/10 text-white">
+                  <div className="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-sm font-bold">
                     ✈️
                   </div>
                   <div className="font-mono text-2xl font-black text-white">{stats.appliedCount || 3}</div>
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-300">Applied</div>
+                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-200">Applied</div>
                 </div>
 
-                <div className="glass-card p-3.5 text-center min-w-[100px] border-white/15 bg-white/10">
-                  <div className="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm font-bold">
+                <div className="glass-card p-3.5 text-center min-w-[100px] border-white/20 bg-white/10 text-white">
+                  <div className="w-8 h-8 mx-auto mb-1.5 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-sm font-bold">
                     {`</>`}
                   </div>
                   <div className="font-mono text-2xl font-black text-white">{(profile?.skills || []).length || 20}</div>
-                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-300">Skills</div>
+                  <div className="text-[10px] uppercase font-bold tracking-wider text-slate-200">Skills</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Segmented Glass Tab Navigation */}
-          <div className="flex gap-2 p-1.5 glass-panel !rounded-2xl border-white/15 overflow-x-auto">
+          <div className="flex gap-2 p-1.5 glass-panel !rounded-2xl border-slate-200/90 dark:border-white/15 overflow-x-auto">
             {TABS.map((t) => (
               <button
                 key={t}
@@ -101,7 +101,7 @@ export default function StudentDashboard() {
                 className={`px-5 py-2.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 ${
                   tab === t
                     ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
-                    : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10'
                 }`}
               >
                 {t === 'Assistant' ? '✨ AI Assistant' : t}
@@ -173,7 +173,7 @@ function Recommendations({ profile, onApplied, search }) {
   return (
     <div className="space-y-4">
       {/* Filter Bar */}
-      <div className="glass-card p-4 grid sm:grid-cols-3 gap-3 border-white/15">
+      <div className="glass-card p-4 grid sm:grid-cols-3 gap-3 border-slate-200/90 dark:border-white/15">
         <input
           type="text"
           placeholder="Search by title, skill, company..."
@@ -184,27 +184,27 @@ function Recommendations({ profile, onApplied, search }) {
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="input text-xs"
+          className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
         >
-          <option value="All" className="bg-[#0C0A1D]">All Types (Remote / On-site / Hybrid)</option>
-          <option value="Remote" className="bg-[#0C0A1D]">Remote</option>
-          <option value="On-site" className="bg-[#0C0A1D]">On-site</option>
-          <option value="Hybrid" className="bg-[#0C0A1D]">Hybrid</option>
+          <option value="All">All Types (Remote / On-site / Hybrid)</option>
+          <option value="Remote">Remote</option>
+          <option value="On-site">On-site</option>
+          <option value="Hybrid">Hybrid</option>
         </select>
         <select
           value={minScore}
           onChange={(e) => setMinScore(e.target.value)}
-          className="input text-xs"
+          className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
         >
-          <option value="0" className="bg-[#0C0A1D]">All Match Scores</option>
-          <option value="60" className="bg-[#0C0A1D]">60%+ Match</option>
-          <option value="75" className="bg-[#0C0A1D]">75%+ Match</option>
-          <option value="85" className="bg-[#0C0A1D]">85%+ Match</option>
+          <option value="0">All Match Scores</option>
+          <option value="60">60%+ Match</option>
+          <option value="75">75%+ Match</option>
+          <option value="85">85%+ Match</option>
         </select>
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-xs font-mono uppercase tracking-widest text-indigo-300 font-semibold">
+        <p className="text-xs font-mono uppercase tracking-widest text-indigo-700 dark:text-indigo-300 font-bold">
           Showing {filteredItems.length} of {items.length} recommendations
         </p>
       </div>
@@ -213,18 +213,18 @@ function Recommendations({ profile, onApplied, search }) {
         <EmptyState text="No internships match your filter criteria." />
       ) : (
         filteredItems.map((i) => (
-          <div key={i.id} className="glass-card p-6 border-white/15 space-y-4">
+          <div key={i.id} className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
             <div className="flex items-start gap-4">
               <MatchSeal score={i.match.overall} size={64} />
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-display text-xl font-bold text-white">{i.title}</h3>
+                  <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white">{i.title}</h3>
                   {i.company_verified ? <span className="chip">Verified employer</span> : <span className="chip-missing">Pending verification</span>}
                 </div>
-                <div className="text-xs text-slate-300 mt-1">
+                <div className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
                   {i.company_name || 'TechNova Solutions'} · {i.location} · {i.type} {i.stipend && `· ${i.stipend}`}
                 </div>
-                <p className="text-xs text-slate-300 mt-2 leading-relaxed">{i.description}</p>
+                <p className="text-xs text-slate-700 dark:text-slate-300 mt-2 leading-relaxed">{i.description}</p>
 
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {i.match.matchedSkills.map((s) => <span key={s} className="chip">{s}</span>)}
@@ -233,21 +233,21 @@ function Recommendations({ profile, onApplied, search }) {
 
                 <button
                   onClick={() => setExpanded(expanded === i.id ? null : i.id)}
-                  className="text-xs text-indigo-300 hover:text-white underline mt-3 font-semibold block"
+                  className="text-xs text-indigo-600 dark:text-indigo-300 hover:underline mt-3 font-bold block"
                 >
                   {expanded === i.id ? 'Hide match breakdown' : 'Why this recommendation?'}
                 </button>
 
                 {expanded === i.id && (
                   <div className="form-rule mt-3 pt-3 grid sm:grid-cols-2 gap-4">
-                    <div className="grid grid-cols-2 gap-y-1.5 text-xs font-mono text-slate-300">
-                      <span className="text-slate-400">Skill</span><span className="text-right font-bold text-indigo-300">{i.match.breakdown.skill}%</span>
-                      <span className="text-slate-400">Location</span><span className="text-right font-bold text-indigo-300">{i.match.breakdown.location}%</span>
-                      <span className="text-slate-400">Type</span><span className="text-right font-bold text-indigo-300">{i.match.breakdown.type}%</span>
-                      <span className="text-slate-400">CGPA</span><span className="text-right font-bold text-indigo-300">{i.match.breakdown.cgpa}%</span>
-                      <span className="text-slate-400">Projects</span><span className="text-right font-bold text-indigo-300">{i.match.breakdown.projects}%</span>
+                    <div className="grid grid-cols-2 gap-y-1.5 text-xs font-mono text-slate-700 dark:text-slate-300">
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Skill</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.skill}%</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Location</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.location}%</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Type</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.type}%</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold">CGPA</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.cgpa}%</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Projects</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.projects}%</span>
                     </div>
-                    <ul className="text-xs text-slate-300 space-y-1">
+                    <ul className="text-xs text-slate-700 dark:text-slate-300 space-y-1 font-medium">
                       {i.match.reasons.map((r, idx) => <li key={idx}>✔ {r}</li>)}
                     </ul>
                   </div>
@@ -255,7 +255,7 @@ function Recommendations({ profile, onApplied, search }) {
 
                 <div className="mt-4">
                   {i.already_applied ? (
-                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl w-fit">
+                    <span className="text-xs text-emerald-700 dark:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl w-fit">
                       ✔ Already Applied
                     </span>
                   ) : (
@@ -279,29 +279,29 @@ function Recommendations({ profile, onApplied, search }) {
       {/* APPLICATION DETAILS FORM MODAL */}
       {selectedInternship && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setSelectedInternship(null)}>
-          <div className="glass-panel max-w-xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto border-white/20" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between border-b border-white/10 pb-3">
+          <div className="glass-panel max-w-xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto border-slate-200/90 dark:border-white/20" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[10px] uppercase font-mono tracking-wider text-purple-400 font-bold">Application Details Form</span>
-                <h3 className="font-display text-2xl font-bold text-white mt-0.5">{selectedInternship.title}</h3>
-                <p className="text-xs text-slate-300">{selectedInternship.company_name} · {selectedInternship.location} ({selectedInternship.type})</p>
+                <span className="text-[10px] uppercase font-mono tracking-wider text-purple-600 dark:text-purple-400 font-bold">Application Details Form</span>
+                <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{selectedInternship.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300">{selectedInternship.company_name} · {selectedInternship.location} ({selectedInternship.type})</p>
               </div>
-              <button onClick={() => setSelectedInternship(null)} className="text-slate-400 hover:text-white text-2xl font-bold">×</button>
+              <button onClick={() => setSelectedInternship(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white text-2xl font-bold">×</button>
             </div>
 
-            <div className="p-4 bg-white/[0.05] rounded-2xl border border-white/10 space-y-2">
-              <div className="font-display font-semibold text-xs text-white flex items-center justify-between">
+            <div className="p-4 bg-slate-100/90 dark:bg-white/[0.05] rounded-2xl border border-slate-200 dark:border-white/10 space-y-2">
+              <div className="font-display font-bold text-xs text-slate-900 dark:text-white flex items-center justify-between">
                 <span>Applicant Profile Summary</span>
                 <span className="chip font-mono text-[10px]">Match: {selectedInternship.match.overall}%</span>
               </div>
-              <div className="grid sm:grid-cols-2 gap-2 text-xs text-slate-300">
-                <div><span className="text-slate-400">Name:</span> {profile?.name || 'Student'}</div>
-                <div><span className="text-slate-400">CGPA:</span> {profile?.cgpa || 'N/A'} / 10</div>
-                <div><span className="text-slate-400">Phone:</span> {profile?.phone || 'N/A'}</div>
-                <div><span className="text-slate-400">Resume:</span> {profile?.resume_filename ? '📄 Attached' : 'Not uploaded'}</div>
+              <div className="grid sm:grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-300">
+                <div><span className="text-slate-500 font-semibold">Name:</span> {profile?.name || 'Student'}</div>
+                <div><span className="text-slate-500 font-semibold">CGPA:</span> {profile?.cgpa || 'N/A'} / 10</div>
+                <div><span className="text-slate-500 font-semibold">Phone:</span> {profile?.phone || 'N/A'}</div>
+                <div><span className="text-slate-500 font-semibold">Resume:</span> {profile?.resume_filename ? '📄 Attached' : 'Not uploaded'}</div>
               </div>
               <div className="pt-1">
-                <span className="text-slate-400 text-xs block mb-1">Your Skills:</span>
+                <span className="text-slate-500 font-semibold text-xs block mb-1">Your Skills:</span>
                 <div className="flex flex-wrap gap-1">
                   {(profile?.skills || []).map((s) => <span key={s} className="chip">{s}</span>)}
                 </div>
@@ -319,7 +319,7 @@ function Recommendations({ profile, onApplied, search }) {
               />
             </div>
 
-            <div className="pt-2 flex justify-end gap-3 border-t border-white/10">
+            <div className="pt-2 flex justify-end gap-3 border-t border-slate-200 dark:border-white/10">
               <button type="button" onClick={() => setSelectedInternship(null)} className="btn-secondary text-xs !py-2">
                 Cancel
               </button>
@@ -412,23 +412,23 @@ function ProfileEditor({ profile, onSaved }) {
   return (
     <div className="grid lg:grid-cols-[1fr,340px] gap-6">
       {/* Profile Editor Form */}
-      <form onSubmit={save} className="glass-card p-6 sm:p-8 space-y-5 border-white/15">
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+      <form onSubmit={save} className="glass-card p-6 sm:p-8 space-y-5 border-slate-200/90 dark:border-white/15">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
           <div className="flex items-center gap-2">
             <span className="text-lg">👤</span>
-            <h2 className="font-display font-extrabold text-xl text-white">Student Profile</h2>
+            <h2 className="font-display font-extrabold text-xl text-slate-900 dark:text-white">Student Profile</h2>
           </div>
           <div>
             {saved ? (
-              <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold px-3 py-1 rounded-full">
+              <span className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full">
                 ✔ Saved
               </span>
             ) : isDirty ? (
-              <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full">
+              <span className="bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 text-xs font-bold px-3 py-1 rounded-full">
                 ⚠️ Unsaved changes
               </span>
             ) : (
-              <span className="bg-white/10 text-slate-300 text-xs font-semibold px-3 py-1 rounded-full">
+              <span className="bg-slate-200/80 dark:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold px-3 py-1 rounded-full">
                 Up to date
               </span>
             )}
@@ -441,10 +441,10 @@ function ProfileEditor({ profile, onSaved }) {
           <div><label className="label">Preferred Location</label><input className="input" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Kanpur" /></div>
           <div>
             <label className="label">Internship Type</label>
-            <select className="input" value={form.preferred_type} onChange={(e) => setForm({ ...form, preferred_type: e.target.value })}>
-              <option className="bg-[#0C0A1D]">Remote</option>
-              <option className="bg-[#0C0A1D]">On-site</option>
-              <option className="bg-[#0C0A1D]">Hybrid</option>
+            <select className="input text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]" value={form.preferred_type} onChange={(e) => setForm({ ...form, preferred_type: e.target.value })}>
+              <option value="Remote">Remote</option>
+              <option value="On-site">On-site</option>
+              <option value="Hybrid">Hybrid</option>
             </select>
           </div>
           <div><label className="label">CGPA (Out of 10)</label><input className="input" type="number" step="0.1" min="0" max="10" value={form.cgpa} onChange={(e) => setForm({ ...form, cgpa: e.target.value })} placeholder="e.g. 8.5" /></div>
@@ -458,11 +458,11 @@ function ProfileEditor({ profile, onSaved }) {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="label !mb-0">📁 Projects</label>
-            <button type="button" onClick={() => setProjects([...projects, { title: '', description: '' }])} className="text-xs text-indigo-300 hover:text-white underline font-semibold">+ Add Project</button>
+            <button type="button" onClick={() => setProjects([...projects, { title: '', description: '' }])} className="text-xs text-indigo-600 dark:text-indigo-300 hover:underline font-bold">+ Add Project</button>
           </div>
           <div className="space-y-3">
             {projects.map((p, idx) => (
-              <div key={idx} className="border border-white/10 rounded-2xl p-4 space-y-2 bg-white/[0.04]">
+              <div key={idx} className="border border-slate-200 dark:border-white/10 rounded-2xl p-4 space-y-2 bg-slate-100/60 dark:bg-white/[0.04]">
                 <input className="input text-xs" placeholder="Project title" value={p.title} onChange={(e) => updateProject(idx, 'title', e.target.value)} />
                 <textarea className="input text-xs" rows={2} placeholder="Describe it in your own words — e.g. 'Built a MERN e-commerce website'" value={p.description} onChange={(e) => updateProject(idx, 'description', e.target.value)} />
               </div>
@@ -478,51 +478,51 @@ function ProfileEditor({ profile, onSaved }) {
       {/* Right Sidebar Cards */}
       <div className="space-y-6">
         {/* Card 1: AI Resume Parser */}
-        <div className="glass-card p-6 border-white/15 space-y-4">
+        <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center justify-center text-xl">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 flex items-center justify-center text-xl">
               📄
             </div>
             <div>
-              <div className="font-display font-bold text-base text-white">AI Resume Parser</div>
+              <div className="font-display font-bold text-base text-slate-900 dark:text-white">AI Resume Parser</div>
             </div>
           </div>
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
             Upload a PDF resume — we'll extract your skills automatically.
           </p>
           <form onSubmit={uploadResume} className="space-y-3">
-            <input type="file" accept="application/pdf" onChange={(e) => setResumeFile(e.target.files[0])} className="text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/20 file:text-indigo-300 hover:file:bg-indigo-500/30 cursor-pointer" />
+            <input type="file" accept="application/pdf" onChange={(e) => setResumeFile(e.target.files[0])} className="text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/15 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-500/25 cursor-pointer" />
             <button className="btn-primary w-full text-xs !py-2.5" disabled={!resumeFile || parsing}>
               {parsing ? 'Parsing…' : 'Upload & Parse'}
             </button>
           </form>
           {parsedInfo && (
-            <div className="form-rule mt-3 pt-3 text-xs space-y-1 text-slate-300">
-              {parsedInfo.name && <div><span className="text-slate-400">Name:</span> {parsedInfo.name}</div>}
-              {parsedInfo.email && <div><span className="text-slate-400">Email:</span> {parsedInfo.email}</div>}
+            <div className="form-rule mt-3 pt-3 text-xs space-y-1 text-slate-700 dark:text-slate-300">
+              {parsedInfo.name && <div><span className="text-slate-500">Name:</span> {parsedInfo.name}</div>}
+              {parsedInfo.email && <div><span className="text-slate-500">Email:</span> {parsedInfo.email}</div>}
               <div className="flex flex-wrap gap-1 mt-1">{parsedInfo.skills.map((s) => <span key={s} className="chip">{s}</span>)}</div>
             </div>
           )}
         </div>
 
         {/* Card 2: AI Resume Improvement */}
-        <div className="glass-card p-6 border-white/15 space-y-4">
+        <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center text-xl">
+            <div className="w-10 h-10 rounded-2xl bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 flex items-center justify-center text-xl">
               ✨
             </div>
             <div>
-              <div className="font-display font-bold text-base text-white">AI Resume Improvement</div>
+              <div className="font-display font-bold text-base text-slate-900 dark:text-white">AI Resume Improvement</div>
             </div>
           </div>
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
             Get suggestions to strengthen your profile.
           </p>
           <button onClick={loadSuggestions} className="btn-primary w-full text-xs !py-2.5">
             Get Suggestions
           </button>
           {suggestions && (
-            <ul className="mt-3 space-y-2 text-xs text-slate-300">
+            <ul className="mt-3 space-y-2 text-xs text-slate-700 dark:text-slate-300 font-medium">
               {suggestions.map((s, i) => <li key={i}>☐ {s}</li>)}
             </ul>
           )}
@@ -543,19 +543,19 @@ function GapAnalysis() {
   const max = Math.max(...gaps.map((g) => g.demandCount), 1);
 
   return (
-    <div className="glass-card p-6 border-white/15 space-y-4">
+    <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
       <div>
-        <h2 className="font-display font-bold text-xl text-white">Skills vs. Market Demand</h2>
-        <p className="text-xs text-slate-300 mt-1">Ranked by how often each skill appears across current internship postings.</p>
+        <h2 className="font-display font-bold text-xl text-slate-900 dark:text-white">Skills vs. Market Demand</h2>
+        <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">Ranked by how often each skill appears across current internship postings.</p>
       </div>
       <div className="space-y-3 pt-2">
         {gaps.map((g) => (
           <div key={g.skill} className="flex items-center gap-3">
-            <div className="w-32 shrink-0 text-xs font-semibold text-slate-200 capitalize">{g.skill}</div>
-            <div className="flex-1 h-3 rounded-full bg-white/10 overflow-hidden">
+            <div className="w-32 shrink-0 text-xs font-bold text-slate-800 dark:text-slate-200 capitalize">{g.skill}</div>
+            <div className="flex-1 h-3 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
               <div className={`h-full rounded-full ${g.have ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-amber-500 to-orange-500'}`} style={{ width: `${(g.demandCount / max) * 100}%` }} />
             </div>
-            <div className="w-24 text-right text-xs font-mono">{g.have ? <span className="text-emerald-400 font-bold">✔ Have</span> : <span className="text-amber-400 font-bold">Learn this</span>}</div>
+            <div className="w-24 text-right text-xs font-mono">{g.have ? <span className="text-emerald-700 dark:text-emerald-400 font-bold">✔ Have</span> : <span className="text-amber-700 dark:text-amber-400 font-bold">Learn this</span>}</div>
           </div>
         ))}
       </div>
@@ -569,28 +569,28 @@ function Applications() {
   useEffect(() => { api.get('/student/applications').then((r) => setApps(r.data)); }, []);
 
   const statusBadgeStyle = {
-    applied: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    shortlisted: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-    interview: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-    offered: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    rejected: 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+    applied: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30',
+    shortlisted: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
+    interview: 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30',
+    offered: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+    rejected: 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30'
   };
 
   if (!apps) return <SkeletonList />;
   if (apps.length === 0) return <EmptyState text="You haven't applied to anything yet — check Recommendations." />;
 
   return (
-    <div className="glass-card p-6 border-white/15 space-y-4">
-      <h2 className="font-display font-bold text-xl text-white">Your Applications</h2>
-      <div className="divide-y divide-white/10 space-y-3">
+    <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
+      <h2 className="font-display font-bold text-xl text-slate-900 dark:text-white">Your Applications</h2>
+      <div className="divide-y divide-slate-200 dark:divide-white/10 space-y-3">
         {apps.map((a) => (
           <div key={a.id} className="pt-3 flex items-center gap-4">
             <MatchSeal score={a.match_score} size={48} />
             <div className="flex-1 min-w-0">
-              <div className="font-display font-bold text-sm text-white">{a.title}</div>
-              <div className="text-xs text-slate-300 mt-0.5">{a.company_name} · {a.location} · applied {new Date(a.applied_at).toLocaleDateString()}</div>
+              <div className="font-display font-bold text-sm text-slate-900 dark:text-white">{a.title}</div>
+              <div className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">{a.company_name} · {a.location} · applied {new Date(a.applied_at).toLocaleDateString()}</div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize border backdrop-blur-md ${statusBadgeStyle[a.status] || 'bg-white/10 text-slate-300 border-white/20'}`}>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize border backdrop-blur-md ${statusBadgeStyle[a.status] || 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-white/20'}`}>
               {a.status}
             </span>
           </div>
@@ -637,14 +637,14 @@ function Assistant() {
   ];
 
   return (
-    <div className="glass-card p-6 border-white/15 max-w-3xl space-y-4">
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+    <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 max-w-3xl space-y-4">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
         <div>
-          <div className="font-display text-xl font-bold text-white flex items-center gap-2">
+          <div className="font-display text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <span>✨ AI Career Assistant</span>
-            <span className="text-[10px] uppercase font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md font-bold">Generative LLM</span>
+            <span className="text-[10px] uppercase font-mono bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md font-bold">Generative LLM</span>
           </div>
-          <p className="text-xs text-slate-300 mt-0.5">Live career guidance based on your student profile and application history.</p>
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">Live career guidance based on your student profile and application history.</p>
         </div>
       </div>
 
@@ -652,16 +652,16 @@ function Assistant() {
         {messages.map((m, i) => (
           <div
             key={i}
-            className={`text-xs rounded-2xl px-4 py-3 max-w-[85%] shadow-md leading-relaxed ${
+            className={`text-xs rounded-2xl px-4 py-3 max-w-[85%] shadow-md leading-relaxed font-medium ${
               m.from === 'bot'
-                ? 'bg-white/10 border border-white/15 text-slate-100 rounded-tl-xs backdrop-blur-md'
+                ? 'bg-slate-100/90 dark:bg-white/10 border border-slate-200 dark:border-white/15 text-slate-800 dark:text-slate-100 rounded-tl-xs backdrop-blur-md'
                 : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white ml-auto rounded-tr-xs shadow-lg'
             }`}
           >
             {m.text}
           </div>
         ))}
-        {sending && <div className="text-xs text-indigo-300 font-mono italic animate-pulse">AI is thinking…</div>}
+        {sending && <div className="text-xs text-indigo-600 dark:text-indigo-300 font-mono italic animate-pulse font-semibold">AI is thinking…</div>}
       </div>
 
       {/* Prompt Chips */}
@@ -672,7 +672,7 @@ function Assistant() {
             type="button"
             disabled={sending}
             onClick={() => sendMessage(chip.replace(/^[✨💡🎯📄⚡]\s*/, ''))}
-            className="text-xs bg-white/10 hover:bg-white/20 text-slate-200 font-semibold px-3 py-1.5 rounded-xl border border-white/15 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+            className="text-xs bg-slate-200/70 dark:bg-white/10 hover:bg-slate-300/80 dark:hover:bg-white/20 text-slate-800 dark:text-slate-200 font-bold px-3 py-1.5 rounded-xl border border-slate-300/80 dark:border-white/15 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
           >
             {chip}
           </button>
@@ -696,8 +696,8 @@ function Assistant() {
 
 // ---------------------------------------------------------------------------
 function SkeletonList() {
-  return <div className="space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-28 rounded-2xl bg-white/5 animate-pulse border border-white/10" />)}</div>;
+  return <div className="space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-28 rounded-2xl bg-slate-200/60 dark:bg-white/5 animate-pulse border border-slate-300/60 dark:border-white/10" />)}</div>;
 }
 function EmptyState({ text }) {
-  return <div className="glass-card p-10 text-center text-slate-400 text-xs">{text}</div>;
+  return <div className="glass-card p-10 text-center text-slate-500 dark:text-slate-400 text-xs font-semibold">{text}</div>;
 }

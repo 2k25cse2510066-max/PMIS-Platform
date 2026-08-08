@@ -30,7 +30,7 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
       </svg>
     )},
     { id: 'Assistant', label: '✨ AI Assistant', icon: (
-      <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
       </svg>
     )},
@@ -55,7 +55,7 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
         <div className="h-full glass-panel p-4 flex flex-col justify-between overflow-y-auto">
           {/* Navigation Links */}
           <div className="space-y-1.5">
-            <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-slate-400 font-semibold">
+            <div className="px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold">
               Portal Menu
             </div>
             {menuItems.map((item) => {
@@ -67,13 +67,13 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
                     onSelectTab(item.id === 'Dashboard' ? 'Recommendations' : item.id);
                     if (onClose) onClose();
                   }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
+                  className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600/90 via-indigo-600/90 to-purple-600/90 text-white shadow-lg shadow-indigo-500/25 border border-white/20'
-                      : 'text-slate-700 dark:text-slate-300 hover:text-white hover:bg-white/10 dark:hover:bg-white/[0.08]'
+                      ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/25 border border-white/20'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/[0.08]'
                   }`}
                 >
-                  <span className={isActive ? 'text-white' : 'text-slate-400 dark:text-slate-400'}>
+                  <span className={isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}>
                     {item.icon}
                   </span>
                   <span>{item.label}</span>
@@ -82,21 +82,23 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
             })}
           </div>
 
-          {/* Premium Upgrade Card at Bottom */}
-          <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-slate-900/60 border border-white/15 backdrop-blur-md space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-base">👑</span>
-              <span className="font-display text-xs font-bold text-white">Upgrade to Premium</span>
+          {/* Premium Feature Coming Soon Card (NO ALERT POPUP) */}
+          <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 border border-indigo-500/20 dark:border-white/15 backdrop-blur-md space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base">👑</span>
+                <span className="font-display text-xs font-bold text-slate-900 dark:text-white">Premium Features</span>
+              </div>
+              <span className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[9px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded-full">
+                Coming Soon
+              </span>
             </div>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Unlock advanced insights and AI recommendations.
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              Advanced AI insights, personalized recommendations and career analytics are coming soon.
             </p>
-            <button
-              onClick={() => alert('Premium tier features coming soon!')}
-              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-xs font-bold shadow-md transition-all active:scale-95"
-            >
-              Upgrade Now
-            </button>
+            <div className="w-full py-2 px-3 rounded-xl bg-slate-200/60 dark:bg-white/10 text-slate-500 dark:text-slate-400 text-xs font-semibold text-center cursor-not-allowed border border-slate-300/60 dark:border-white/10">
+              ⚡ Tier Preview
+            </div>
           </div>
         </div>
       </aside>

@@ -4,7 +4,7 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    return localStorage.getItem('pmis_theme') || 'dark';
+    return localStorage.getItem('pmis_theme') || 'system';
   });
 
   const [resolvedTheme, setResolvedTheme] = useState('dark');
@@ -13,12 +13,32 @@ export function ThemeProvider({ children }) {
     const root = document.documentElement;
 
     function applyTheme() {
-      // Force dark class for glassmorphism base design
-      root.classList.add('dark');
-      setResolvedTheme('dark');
+      let isDark = false;
+      if (theme === 'dark') {
+        isDark = true;
+      } else if (theme === 'light') {
+        isDark = false;
+      } else {
+        isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      if (isDark) {
+        root.classList.add('dark');
+        setResolvedTheme('dark');
+      } else {
+        root.classList.remove('dark');
+        setResolvedTheme('light');
+      }
     }
 
     applyTheme();
+
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => applyTheme();
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
   }, [theme]);
 
   const setTheme = (newTheme) => {

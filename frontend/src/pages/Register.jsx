@@ -31,10 +31,10 @@ export default function Register() {
     <div className="min-h-screen relative z-10">
       <Navbar />
       <div className="max-w-md mx-auto px-5 pt-16 pb-16 flex flex-col justify-center">
-        <div className="glass-panel p-8 space-y-6 border-white/20">
+        <div className="glass-panel p-8 space-y-6 border-slate-200/90 dark:border-white/20">
           <div>
-            <h1 className="font-display text-3xl font-extrabold text-white mb-1">Create an Account</h1>
-            <p className="text-slate-300 text-xs">Choose how you'll use the platform.</p>
+            <h1 className="font-display text-3xl font-extrabold text-slate-900 dark:text-white mb-1">Create an Account</h1>
+            <p className="text-slate-600 dark:text-slate-300 text-xs font-medium">Choose how you'll use the platform.</p>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
@@ -46,7 +46,7 @@ export default function Register() {
                 className={`rounded-xl border px-3 py-2.5 text-xs font-bold capitalize transition-all ${
                   role === r
                     ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 border-white/20'
-                    : 'bg-white/10 text-slate-200 border-white/15 hover:bg-white/20'
+                    : 'bg-white dark:bg-white/10 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-white/15 hover:bg-slate-200/60 dark:hover:bg-white/20'
                 }`}
               >
                 {r}
@@ -55,7 +55,7 @@ export default function Register() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="text-xs text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2">{error}</div>}
+            {error && <div className="text-xs text-rose-700 dark:text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2 font-semibold">{error}</div>}
             <div>
               <label className="label">{role === 'company' ? 'Company Name' : 'Full Name'}</label>
               <input className="input text-xs" required value={name} onChange={(e) => setName(e.target.value)} placeholder={role === 'company' ? 'TechNova Solutions' : 'Priya Verma'} />
@@ -69,14 +69,14 @@ export default function Register() {
               <input className="input text-xs" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" />
             </div>
             {role === 'company' && (
-              <p className="text-[11px] text-slate-400">Companies must be verified by an MCA admin before posting internships.</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Companies must be verified by an MCA admin before posting internships.</p>
             )}
-            <button className="btn-primary w-full !py-3 text-xs" disabled={loading}>{loading ? 'Creating Account…' : 'Create Account'}</button>
+            <button className="btn-primary w-full !py-3 text-xs font-bold" disabled={loading}>{loading ? 'Creating Account…' : 'Create Account'}</button>
           </form>
 
-          <p className="text-xs text-slate-300 text-center">
+          <p className="text-xs text-slate-600 dark:text-slate-300 text-center font-medium">
             Already registered?{' '}
-            <Link to="/login" className="text-indigo-300 font-bold underline hover:text-white">
+            <Link to="/login" className="text-indigo-600 dark:text-indigo-300 font-bold underline hover:text-indigo-800 dark:hover:text-white">
               Sign in
             </Link>
           </p>
