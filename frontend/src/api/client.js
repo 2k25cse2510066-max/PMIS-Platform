@@ -1,10 +1,14 @@
 import axios from 'axios';
 
 const baseURL =
-  import.meta.env.VITE_API_URL ||
-  '/api';
+  import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/api'
+    ? import.meta.env.VITE_API_URL
+    : 'https://pmis-platform.onrender.com/api';
 
-const api = axios.create({ baseURL });
+const api = axios.create({
+  baseURL,
+  timeout: 12000 // 12 seconds timeout to prevent browser ERR_CONNECTION_TIMED_OUT
+});
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('pmis_token');
