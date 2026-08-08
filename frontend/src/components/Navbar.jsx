@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import PremiumModal from './PremiumModal';
 import api from '../api/client';
 
 export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
@@ -14,6 +15,7 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
   const [showNotifs, setShowNotifs] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const [notifPrefs, setNotifPrefs] = useState(() => {
     const raw = localStorage.getItem('pmis_notif_prefs');
@@ -114,6 +116,16 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
 
           {/* Right Action Icons & Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* 👑 PREMIUM TIER BUTTON */}
+            <button
+              onClick={() => setShowPremiumModal(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold hover:from-amber-500/30 hover:to-purple-500/30 transition-all shadow-sm active:scale-95"
+              title="Explore Premium Features"
+            >
+              <span>👑</span>
+              <span>Premium</span>
+            </button>
+
             {/* 1. NOTIFICATIONS 🔔 */}
             {user && (
               <div className="relative" ref={notifRef}>
@@ -135,7 +147,7 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
                   )}
                 </button>
 
-                {/* NOTIFICATION DROPDOWN WITH HIGH OPACITY & STRONG READABILITY */}
+                {/* NOTIFICATION DROPDOWN */}
                 {showNotifs && (
                   <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl bg-white/95 dark:bg-[#0F0D25]/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/15 p-4 shadow-2xl z-50 space-y-3">
                     <div className="font-display font-bold text-sm text-slate-900 dark:text-white border-b border-slate-200 dark:border-white/10 pb-2 flex justify-between items-center">
@@ -364,6 +376,12 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
           </div>
         </div>
       </header>
+
+      {/* PREMIUM MODAL */}
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
 
       {/* CHANGE PASSWORD MODAL */}
       {showPasswordModal && (

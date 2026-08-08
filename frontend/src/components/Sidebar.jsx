@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import PremiumModal from './PremiumModal';
 
 export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
   const { user } = useAuth();
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const menuItems = [
     { id: 'Dashboard', label: 'Dashboard', icon: (
@@ -82,26 +85,43 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
             })}
           </div>
 
-          {/* Premium Feature Coming Soon Card (NO ALERT POPUP) */}
-          <div className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 border border-indigo-500/20 dark:border-white/15 backdrop-blur-md space-y-2.5">
+          {/* Premium Feature Card with Interactive Early Access Preview */}
+          <div
+            onClick={() => setShowPremiumModal(true)}
+            className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 border border-indigo-500/20 dark:border-white/15 backdrop-blur-md space-y-2.5 cursor-pointer hover:border-indigo-500/40 hover:shadow-lg transition-all group"
+          >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5">
-                <span className="text-base">👑</span>
+                <span className="text-base group-hover:scale-110 transition-transform">👑</span>
                 <span className="font-display text-xs font-bold text-slate-900 dark:text-white">Premium Features</span>
               </div>
               <span className="bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[9px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded-full">
-                Coming Soon
+                Early Access
               </span>
             </div>
             <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
               Advanced AI insights, personalized recommendations and career analytics are coming soon.
             </p>
-            <div className="w-full py-2 px-3 rounded-xl bg-slate-200/60 dark:bg-white/10 text-slate-500 dark:text-slate-400 text-xs font-semibold text-center cursor-not-allowed border border-slate-300/60 dark:border-white/10">
-              ⚡ Tier Preview
-            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPremiumModal(true);
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md hover:from-blue-500 hover:to-purple-500 transition-all active:scale-95 flex items-center justify-center gap-1"
+            >
+              <span>Explore Features</span>
+              <span>→</span>
+            </button>
           </div>
         </div>
       </aside>
+
+      {/* Premium Feature Preview Modal */}
+      <PremiumModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </>
   );
 }
