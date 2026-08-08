@@ -4,10 +4,10 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(() => {
-    return localStorage.getItem('pmis_theme') || 'system';
+    return localStorage.getItem('pmis_theme') || 'dark';
   });
 
-  const [resolvedTheme, setResolvedTheme] = useState('light');
+  const [resolvedTheme, setResolvedTheme] = useState('dark');
 
   useEffect(() => {
     const root = document.documentElement;

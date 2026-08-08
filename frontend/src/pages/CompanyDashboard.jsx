@@ -8,6 +8,7 @@ export default function CompanyDashboard() {
   const [internships, setInternships] = useState(null);
   const [selected, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [search, setSearch] = useState('');
 
   const loadAll = useCallback(() => {
     api.get('/company/profile').then((r) => setProfile(r.data));
@@ -20,31 +21,31 @@ export default function CompanyDashboard() {
   useEffect(() => { loadAll(); }, []); // eslint-disable-line
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-navy-950 text-navy-800 dark:text-navy-100 transition-colors duration-200">
-      <Navbar />
-      <div className="max-w-6xl mx-auto px-4 sm:px-5 py-8 space-y-6">
+    <div className="min-h-screen relative z-10">
+      <Navbar search={search} onSearchChange={setSearch} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Employer Hero Header */}
-        <div className="glass-card p-6 border-navy-100/90 dark:border-navy-800 relative overflow-hidden bg-gradient-to-r from-navy-800 via-navy-700 to-navy-800 text-white shadow-md">
+        <div className="glass-panel p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-blue-900/40 via-indigo-900/40 to-purple-900/40 border-white/15">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 text-white flex items-center justify-center font-display font-bold text-2xl shadow-inner shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-display font-bold text-2xl shadow-lg border border-white/20 shrink-0">
                 🏢
               </div>
               <div>
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight">{profile?.name || 'Company Portal'}</h1>
+                  <h1 className="font-display text-2xl md:text-3xl font-extrabold text-white tracking-tight">{profile?.name || 'Company Portal'}</h1>
                   {profile?.verified ? (
-                    <span className="bg-leaf-500/20 text-leaf-300 border border-leaf-400/30 text-xs font-semibold px-3 py-1 rounded-full">✔ Verified Employer</span>
+                    <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-sm">✔ Verified Employer</span>
                   ) : (
-                    <span className="bg-saffron-500/20 text-saffron-300 border border-saffron-400/30 text-xs font-semibold px-3 py-1 rounded-full">Pending Verification</span>
+                    <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-sm">Pending Verification</span>
                   )}
                 </div>
-                <p className="text-navy-100/80 text-sm mt-1">Post internship seats, review candidate match breakdown, and manage status hiring pipelines.</p>
+                <p className="text-slate-300 text-xs mt-1">Post internship seats, review candidate match breakdown, and manage status hiring pipelines.</p>
               </div>
             </div>
 
             <button
-              className="btn-saffron text-sm !px-5 !py-2.5 shrink-0 shadow-md"
+              className="btn-saffron text-xs !px-5 !py-2.5 shrink-0 shadow-md"
               disabled={!profile?.verified}
               onClick={() => setShowForm((s) => !s)}
             >
@@ -54,8 +55,8 @@ export default function CompanyDashboard() {
         </div>
 
         {!profile?.verified && (
-          <div className="glass-card p-4 text-sm text-saffron-800 dark:text-saffron-300 bg-saffron-50 dark:bg-saffron-950/40 border-saffron-200/80 dark:border-saffron-800/80 flex items-center gap-3">
-            <span className="text-lg">⏳</span>
+          <div className="glass-card p-4 text-xs text-amber-300 bg-amber-500/10 border-amber-500/30 flex items-center gap-3">
+            <span className="text-base">⏳</span>
             <span>Your company profile is undergoing verification by an MCA Admin. You can manage your draft postings below.</span>
           </div>
         )}
@@ -67,24 +68,25 @@ export default function CompanyDashboard() {
         ) : internships.length === 0 ? (
           <EmptyState text="No postings yet — create your first internship above." />
         ) : (
-          <div className="grid md:grid-cols-[260px,1fr] gap-6 mt-4">
+          <div className="grid md:grid-cols-[280px,1fr] gap-6 mt-4">
             <div className="space-y-2">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold px-1 mb-2">Your Postings</div>
               {internships.map((i) => (
                 <button
                   key={i.id}
                   onClick={() => setSelected(i.id)}
-                  className={`w-full text-left rounded-card border px-4 py-3 transition-colors ${
+                  className={`w-full text-left rounded-2xl border px-4 py-3 transition-all ${
                     selected === i.id
-                      ? 'border-navy-600 dark:border-navy-400 bg-navy-50 dark:bg-navy-800'
-                      : 'border-navy-100 dark:border-navy-800/80 hover:bg-navy-50/50 dark:hover:bg-navy-900/60'
+                      ? 'border-indigo-500/60 bg-gradient-to-r from-blue-600/30 via-indigo-600/30 to-purple-600/30 text-white shadow-lg backdrop-blur-md'
+                      : 'border-white/10 bg-white/[0.05] hover:bg-white/10 text-slate-300'
                   }`}
                 >
-                  <div className="font-medium text-navy-800 dark:text-navy-100 text-sm">{i.title}</div>
-                  <div className="text-xs text-navy-500 dark:text-navy-400">{i.location} · {i.seats} seats</div>
+                  <div className="font-bold text-white text-sm">{i.title}</div>
+                  <div className="text-xs text-slate-300 mt-0.5">{i.location} · {i.seats} seats</div>
                 </button>
               ))}
             </div>
-            {selected && <Applicants internshipId={selected} />}
+            {selected && <Applicants internshipId={selected} search={search} />}
           </div>
         )}
       </div>
@@ -116,32 +118,34 @@ function PostForm({ onCreated }) {
   }
 
   return (
-    <form onSubmit={submit} className="stub-card p-6 mb-6 space-y-4">
-      {error && <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-card px-3 py-2">{error}</div>}
+    <form onSubmit={submit} className="glass-card p-6 mb-6 space-y-4 border-white/15">
+      {error && <div className="text-xs text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2">{error}</div>}
       <div className="grid sm:grid-cols-2 gap-4">
-        <div className="sm:col-span-2"><label className="label">Title</label><input className="input" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Full Stack Development Intern" /></div>
-        <div className="sm:col-span-2"><label className="label">Description</label><textarea className="input" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-        <div className="sm:col-span-2"><label className="label">Required skills (comma separated)</label><input className="input" value={form.required_skills} onChange={(e) => setForm({ ...form, required_skills: e.target.value })} placeholder="react, node.js, mongodb, rest apis" /></div>
-        <div><label className="label">Location</label><input className="input" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Kanpur / Remote" /></div>
+        <div className="sm:col-span-2"><label className="label">Title</label><input className="input text-xs" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Full Stack Development Intern" /></div>
+        <div className="sm:col-span-2"><label className="label">Description</label><textarea className="input text-xs" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+        <div className="sm:col-span-2"><label className="label">Required skills (comma separated)</label><input className="input text-xs" value={form.required_skills} onChange={(e) => setForm({ ...form, required_skills: e.target.value })} placeholder="react, node.js, mongodb, rest apis" /></div>
+        <div><label className="label">Location</label><input className="input text-xs" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Kanpur / Remote" /></div>
         <div>
           <label className="label">Type</label>
-          <select className="input" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-            <option>On-site</option><option>Remote</option><option>Hybrid</option>
+          <select className="input text-xs" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+            <option className="bg-[#0C0A1D]">On-site</option><option className="bg-[#0C0A1D]">Remote</option><option className="bg-[#0C0A1D]">Hybrid</option>
           </select>
         </div>
-        <div><label className="label">Seats</label><input className="input" type="number" min="1" value={form.seats} onChange={(e) => setForm({ ...form, seats: e.target.value })} /></div>
-        <div><label className="label">Stipend</label><input className="input" value={form.stipend} onChange={(e) => setForm({ ...form, stipend: e.target.value })} placeholder="₹15,000/month" /></div>
+        <div><label className="label">Seats</label><input className="input text-xs" type="number" min="1" value={form.seats} onChange={(e) => setForm({ ...form, seats: e.target.value })} /></div>
+        <div><label className="label">Stipend</label><input className="input text-xs" value={form.stipend} onChange={(e) => setForm({ ...form, stipend: e.target.value })} placeholder="₹15,000/month" /></div>
       </div>
-      <button className="btn-primary" disabled={saving}>{saving ? 'Posting…' : 'Post internship'}</button>
+      <button className="btn-primary text-xs" disabled={saving}>{saving ? 'Posting…' : 'Post Internship'}</button>
     </form>
   );
 }
 
-function Applicants({ internshipId }) {
+function Applicants({ internshipId, search }) {
   const [apps, setApps] = useState(null);
   const [updating, setUpdating] = useState(null);
   const [query, setQuery] = useState('');
   const [selectedApplicant, setSelectedApplicant] = useState(null);
+
+  const activeQuery = search || query;
 
   const load = useCallback(() => { api.get(`/company/internships/${internshipId}/applicants`).then((r) => setApps(r.data)); }, [internshipId]);
   useEffect(() => { setApps(null); load(); }, [load]);
@@ -163,7 +167,7 @@ function Applicants({ internshipId }) {
   if (apps.length === 0) return <EmptyState text="No applicants yet for this internship." />;
 
   const filteredApps = apps.filter((a) => {
-    const q = query.toLowerCase();
+    const q = activeQuery.toLowerCase();
     return (
       a.name?.toLowerCase().includes(q) ||
       a.skills?.some((s) => s.toLowerCase().includes(q)) ||
@@ -176,7 +180,7 @@ function Applicants({ internshipId }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs font-mono uppercase tracking-widest text-navy-500 dark:text-navy-400">
+        <p className="text-xs font-mono uppercase tracking-widest text-indigo-300 font-bold">
           {filteredApps.length} applicant{filteredApps.length !== 1 && 's'} · ranked by match
         </p>
         <input
@@ -184,7 +188,7 @@ function Applicants({ internshipId }) {
           placeholder="Filter applicants by name or skill..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="input !py-1 !px-3 text-xs !w-60"
+          className="input !py-1.5 !px-3 text-xs !w-60"
         />
       </div>
 
@@ -192,16 +196,16 @@ function Applicants({ internshipId }) {
         <EmptyState text="No applicants match your filter query." />
       ) : (
         filteredApps.map((a) => (
-          <div key={a.application_id} className="stub-card p-4 flex items-center gap-4 hover:border-navy-300 dark:hover:border-navy-600 transition-colors cursor-pointer" onClick={() => setSelectedApplicant(a)}>
+          <div key={a.application_id} className="glass-card p-4 flex items-center gap-4 border-white/15 cursor-pointer hover:border-indigo-400/50" onClick={() => setSelectedApplicant(a)}>
             <MatchSeal score={a.match.overall} size={52} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-navy-800 dark:text-navy-100 hover:underline">{a.name}</span>
+                <span className="font-bold text-white text-sm hover:underline">{a.name}</span>
                 {a.resume_filename && (
-                  <span className="text-[10px] bg-navy-50 dark:bg-navy-800 text-navy-600 dark:text-navy-300 px-1.5 py-0.5 rounded font-mono">📄 Resume attached</span>
+                  <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-mono border border-indigo-500/30">📄 Resume attached</span>
                 )}
               </div>
-              <div className="text-xs text-navy-500 dark:text-navy-400">{a.location || 'Location not set'} {a.cgpa ? `· CGPA ${a.cgpa}` : ''} {a.phone ? `· ${a.phone}` : ''}</div>
+              <div className="text-xs text-slate-300 mt-0.5">{a.location || 'Location not set'} {a.cgpa ? `· CGPA ${a.cgpa}` : ''} {a.phone ? `· ${a.phone}` : ''}</div>
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {a.match.matchedSkills.slice(0, 6).map((s) => <span key={s} className="chip">{s}</span>)}
               </div>
@@ -211,9 +215,9 @@ function Applicants({ internshipId }) {
                 value={a.status}
                 disabled={updating === a.application_id}
                 onChange={(e) => updateStatus(a.application_id, e.target.value)}
-                className="input !w-auto text-sm capitalize"
+                className="input !w-auto text-xs capitalize bg-[#0C0A1D]"
               >
-                {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+                {statuses.map((s) => <option key={s} value={s} className="bg-[#0C0A1D]">{s}</option>)}
               </select>
             </div>
           </div>
@@ -221,29 +225,29 @@ function Applicants({ internshipId }) {
       )}
 
       {selectedApplicant && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedApplicant(null)}>
-          <div className="bg-white dark:bg-navy-900 rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto space-y-4 border border-navy-100 dark:border-navy-800 text-navy-800 dark:text-navy-100" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between border-b border-navy-100 dark:border-navy-800 pb-3">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setSelectedApplicant(null)}>
+          <div className="glass-panel max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto space-y-4 border-white/20" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between border-b border-white/10 pb-3">
               <div>
-                <h3 className="font-display text-2xl font-bold text-navy-800 dark:text-navy-100">{selectedApplicant.name}</h3>
-                <p className="text-sm text-navy-500 dark:text-navy-400">{selectedApplicant.location || 'Location not specified'} · Phone: {selectedApplicant.phone || 'N/A'}</p>
+                <h3 className="font-display text-2xl font-bold text-white">{selectedApplicant.name}</h3>
+                <p className="text-xs text-slate-300">{selectedApplicant.location || 'Location not specified'} · Phone: {selectedApplicant.phone || 'N/A'}</p>
               </div>
-              <button onClick={() => setSelectedApplicant(null)} className="text-navy-400 hover:text-navy-600 text-xl font-bold">×</button>
+              <button onClick={() => setSelectedApplicant(null)} className="text-slate-400 hover:text-white text-xl font-bold">×</button>
             </div>
 
-            <div className="flex items-center gap-4 bg-navy-50 dark:bg-navy-950 p-3 rounded-card border border-navy-100 dark:border-navy-800">
+            <div className="flex items-center gap-4 bg-white/[0.05] p-3.5 rounded-2xl border border-white/10">
               <MatchSeal score={selectedApplicant.match.overall} size={56} />
               <div>
-                <div className="font-display font-semibold text-navy-800 dark:text-navy-100">Match Score: {selectedApplicant.match.overall}%</div>
-                <div className="text-xs text-navy-600 dark:text-navy-300">
+                <div className="font-display font-semibold text-white text-sm">Match Score: {selectedApplicant.match.overall}%</div>
+                <div className="text-xs text-slate-300">
                   Skill overlap: {selectedApplicant.match.breakdown.skill}% · CGPA: {selectedApplicant.cgpa || 'N/A'}
                 </div>
               </div>
             </div>
 
             {selectedApplicant.resume_filename ? (
-              <div className="flex items-center justify-between bg-leaf-50 dark:bg-leaf-950/40 border border-leaf-200 dark:border-leaf-800/80 p-3 rounded-card">
-                <span className="text-xs font-medium text-leaf-800 dark:text-leaf-300">📄 PDF Resume Uploaded ({selectedApplicant.resume_filename})</span>
+              <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 p-3 rounded-2xl">
+                <span className="text-xs font-semibold text-emerald-300">📄 PDF Resume Uploaded ({selectedApplicant.resume_filename})</span>
                 {selectedApplicant.resume_url ? (
                   <a
                     href={selectedApplicant.resume_url}
@@ -251,18 +255,18 @@ function Applicants({ internshipId }) {
                     rel="noreferrer"
                     className="btn-primary text-xs !py-1.5 !px-3"
                   >
-                    View / Download Resume PDF
+                    View / Download PDF
                   </a>
                 ) : (
-                  <span className="text-xs text-leaf-700 dark:text-leaf-400">Resume link unavailable</span>
+                  <span className="text-xs text-emerald-400">Resume link unavailable</span>
                 )}
               </div>
             ) : (
-              <div className="text-xs text-navy-400 dark:text-navy-500 bg-navy-50 dark:bg-navy-950 p-3 rounded-card">No PDF resume uploaded by candidate yet.</div>
+              <div className="text-xs text-slate-400 bg-white/[0.05] p-3 rounded-2xl border border-white/10">No PDF resume uploaded by candidate yet.</div>
             )}
 
             <div>
-              <h4 className="font-display text-sm font-semibold text-navy-800 dark:text-navy-100 mb-1">Skills</h4>
+              <h4 className="font-display text-xs font-bold text-white mb-1">Skills</h4>
               <div className="flex flex-wrap gap-1.5">
                 {selectedApplicant.skills.map((s) => <span key={s} className="chip">{s}</span>)}
               </div>
@@ -270,20 +274,20 @@ function Applicants({ internshipId }) {
 
             {selectedApplicant.projects && selectedApplicant.projects.length > 0 && (
               <div>
-                <h4 className="font-display text-sm font-semibold text-navy-800 dark:text-navy-100 mb-2">Projects</h4>
+                <h4 className="font-display text-xs font-bold text-white mb-2">Projects</h4>
                 <div className="space-y-2">
                   {selectedApplicant.projects.map((p, idx) => (
-                    <div key={idx} className="border border-navy-100 dark:border-navy-800 rounded-card p-3 text-sm bg-navy-50/40 dark:bg-navy-950/40">
-                      <div className="font-medium text-navy-800 dark:text-navy-100">{p.title}</div>
-                      <p className="text-xs text-navy-600 dark:text-navy-300 mt-1">{p.description}</p>
+                    <div key={idx} className="border border-white/10 rounded-2xl p-3 text-xs bg-white/[0.04]">
+                      <div className="font-bold text-white">{p.title}</div>
+                      <p className="text-xs text-slate-300 mt-1">{p.description}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="pt-3 border-t border-navy-100 dark:border-navy-800 flex justify-end">
-              <button onClick={() => setSelectedApplicant(null)} className="btn-secondary text-sm">Close</button>
+            <div className="pt-3 border-t border-white/10 flex justify-end">
+              <button onClick={() => setSelectedApplicant(null)} className="btn-secondary text-xs">Close</button>
             </div>
           </div>
         </div>
@@ -293,8 +297,8 @@ function Applicants({ internshipId }) {
 }
 
 function SkeletonList() {
-  return <div className="space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-20 rounded-card bg-navy-50 dark:bg-navy-900 animate-pulse" />)}</div>;
+  return <div className="space-y-4">{[1, 2, 3].map((i) => <div key={i} className="h-20 rounded-2xl bg-white/5 animate-pulse border border-white/10" />)}</div>;
 }
 function EmptyState({ text }) {
-  return <div className="stub-card p-10 text-center text-navy-400 dark:text-navy-500 text-sm">{text}</div>;
+  return <div className="glass-card p-10 text-center text-slate-400 text-xs">{text}</div>;
 }

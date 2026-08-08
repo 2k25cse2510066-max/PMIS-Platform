@@ -10,20 +10,20 @@ const STEPS = [
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-[#FAF8F5] dark:bg-navy-950 text-navy-800 dark:text-navy-100 transition-colors duration-200">
+    <div className="min-h-screen relative z-10">
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-navy-100 dark:border-navy-800">
-        <div className="max-w-6xl mx-auto px-5 pt-16 pb-20 grid md:grid-cols-[1.2fr,1fr] gap-12 items-center">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-5 pt-16 pb-20 grid md:grid-cols-[1.2fr,1fr] gap-12 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-navy-500 dark:text-navy-400 border border-navy-200 dark:border-navy-700 rounded-full px-3 py-1 mb-6">
+            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-indigo-300 border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md rounded-full px-3.5 py-1 mb-6">
               Ministry of Corporate Affairs · Smart Automation
             </div>
-            <h1 className="font-display text-[2.75rem] leading-[1.05] sm:text-6xl sm:leading-[1.03] text-navy-800 dark:text-navy-100 font-bold">
+            <h1 className="font-display text-[2.75rem] leading-[1.05] sm:text-6xl sm:leading-[1.03] text-white font-extrabold tracking-tight">
               Every internship seat, matched to the student who actually fits it.
             </h1>
-            <p className="mt-6 text-lg text-navy-600 dark:text-navy-300 max-w-xl">
+            <p className="mt-6 text-base sm:text-lg text-slate-300 max-w-xl leading-relaxed">
               Not just CGPA. The allocation engine reads skills out of your projects and resume,
               weighs them against real requirements, and explains every recommendation — so nobody
               gets an internship that doesn't make sense.
@@ -32,32 +32,32 @@ export default function Landing() {
               <Link to="/register" className="btn-saffron">Register as a student</Link>
               <Link to="/register" className="btn-secondary">Register a company</Link>
             </div>
-            <p className="mt-4 text-xs text-navy-400 dark:text-navy-500 font-mono">
+            <p className="mt-4 text-xs text-slate-400 font-mono">
               Demo logins — student: rahul.sharma@example.com / student123 · company: hr@technova.com / company123 · admin: admin@mca.gov.in / admin123
             </p>
           </div>
 
-          {/* Signature element: a "match seal" specimen card, like a filled-in government form */}
-          <div className="stub-card p-6 shadow-sm">
-            <div className="text-[11px] font-mono uppercase tracking-widest text-navy-400 dark:text-navy-400 mb-4">Sample allocation record</div>
+          {/* Sample Allocation Record Glass Card */}
+          <div className="glass-panel p-6 shadow-2xl space-y-4 border-white/20">
+            <div className="text-[11px] font-mono uppercase tracking-widest text-indigo-400 font-bold">Sample allocation record</div>
             <div className="flex items-center gap-4">
-              <div className="seal text-leaf-600 dark:text-leaf-400 border-leaf-500" style={{ width: 72, height: 72, fontSize: 22 }}>
+              <div className="seal text-emerald-400 border-emerald-500" style={{ width: 72, height: 72, fontSize: 22 }}>
                 92<span className="ml-0.5 text-xs opacity-70">%</span>
               </div>
               <div>
-                <div className="font-display text-lg text-navy-800 dark:text-navy-100 font-bold">Full Stack Development Intern</div>
-                <div className="text-sm text-navy-500 dark:text-navy-400">TechNova Solutions · Kanpur</div>
+                <div className="font-display text-lg text-white font-bold">Full Stack Development Intern</div>
+                <div className="text-xs text-slate-300 mt-0.5">TechNova Solutions · Kanpur</div>
               </div>
             </div>
             <div className="form-rule my-4" />
-            <div className="grid grid-cols-2 gap-y-2 text-sm">
-              <span className="text-navy-400 dark:text-navy-400">Skill match</span><span className="text-right font-mono text-navy-700 dark:text-navy-200">90%</span>
-              <span className="text-navy-400 dark:text-navy-400">Location fit</span><span className="text-right font-mono text-navy-700 dark:text-navy-200">100%</span>
-              <span className="text-navy-400 dark:text-navy-400">Academic record</span><span className="text-right font-mono text-navy-700 dark:text-navy-200">84%</span>
-              <span className="text-navy-400 dark:text-navy-400">Project depth</span><span className="text-right font-mono text-navy-700 dark:text-navy-200">100%</span>
+            <div className="grid grid-cols-2 gap-y-2 text-xs text-slate-300">
+              <span className="text-slate-400">Skill match</span><span className="text-right font-mono font-bold text-indigo-300">90%</span>
+              <span className="text-slate-400">Location fit</span><span className="text-right font-mono font-bold text-indigo-300">100%</span>
+              <span className="text-slate-400">Academic record</span><span className="text-right font-mono font-bold text-indigo-300">84%</span>
+              <span className="text-slate-400">Project depth</span><span className="text-right font-mono font-bold text-indigo-300">100%</span>
             </div>
             <div className="form-rule my-4" />
-            <ul className="text-sm text-navy-600 dark:text-navy-300 space-y-1.5">
+            <ul className="text-xs text-slate-300 space-y-1.5">
               <li>✔ React, Node.js and MongoDB match the requirement</li>
               <li>✔ Nearby preferred location</li>
               <li>✔ Strong DSA profile</li>
@@ -67,38 +67,40 @@ export default function Landing() {
       </section>
 
       {/* How it works */}
-      <section className="max-w-6xl mx-auto px-5 py-20">
-        <h2 className="font-display text-3xl font-bold text-navy-800 dark:text-navy-100 mb-2">How allocation works</h2>
-        <p className="text-navy-500 dark:text-navy-400 mb-10 max-w-2xl">Four steps replace weeks of manual resume screening.</p>
+      <section className="max-w-7xl mx-auto px-5 py-20">
+        <h2 className="font-display text-3xl font-extrabold text-white mb-2">How allocation works</h2>
+        <p className="text-slate-300 mb-10 max-w-2xl text-xs sm:text-sm">Four steps replace weeks of manual resume screening.</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {STEPS.map((s) => (
-            <div key={s.n} className="stub-card p-5">
-              <div className="font-mono text-saffron-500 dark:text-saffron-400 text-sm font-bold mb-3">{s.n}</div>
-              <div className="font-display text-navy-800 dark:text-navy-100 font-bold text-lg mb-2">{s.title}</div>
-              <div className="text-sm text-navy-500 dark:text-navy-400">{s.body}</div>
+            <div key={s.n} className="glass-card p-6 border-white/15 space-y-3">
+              <div className="font-mono text-amber-400 text-sm font-black">{s.n}</div>
+              <div className="font-display text-white font-bold text-base">{s.title}</div>
+              <div className="text-xs text-slate-300 leading-relaxed">{s.body}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Roles */}
-      <section className="bg-navy-800 dark:bg-navy-900 text-white border-t border-navy-700">
-        <div className="max-w-6xl mx-auto px-5 py-16 grid md:grid-cols-3 gap-8">
+      <section className="border-t border-white/10 bg-white/[0.03] backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-5 py-16 grid md:grid-cols-3 gap-8">
           {[
             { role: 'Student', body: 'Build a profile, get ranked recommendations with match %, and track every application.', cta: 'Find internships' },
             { role: 'Company', body: 'Post roles once verified, and see applicants automatically ranked with an explainable score.', cta: 'Post an internship' },
             { role: 'Admin', body: 'Verify companies and students, monitor allocation, and watch skill-demand analytics.', cta: 'Open control room' },
           ].map((r) => (
-            <div key={r.role} className="border border-white/15 rounded-card p-6">
-              <div className="font-display text-2xl font-bold mb-2">{r.role}</div>
-              <p className="text-navy-200 text-sm mb-5">{r.body}</p>
-              <Link to="/register" className="text-saffron-400 text-sm font-medium hover:text-saffron-300">{r.cta} →</Link>
+            <div key={r.role} className="glass-card p-6 border-white/15 space-y-3">
+              <div className="font-display text-2xl font-bold text-white">{r.role}</div>
+              <p className="text-slate-300 text-xs leading-relaxed">{r.body}</p>
+              <Link to="/register" className="text-amber-400 text-xs font-bold hover:text-amber-300 inline-block pt-2">
+                {r.cta} →
+              </Link>
             </div>
           ))}
         </div>
       </section>
 
-      <footer className="max-w-6xl mx-auto px-5 py-8 text-xs text-navy-400 dark:text-navy-500 font-mono">
+      <footer className="max-w-7xl mx-auto px-5 py-8 text-xs text-slate-400 font-mono">
         Prototype built for the PM Internship Scheme · Smart Automation theme · Not an official Government of India deployment
       </footer>
     </div>

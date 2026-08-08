@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../api/client';
 
-export default function Navbar() {
+export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -64,28 +63,60 @@ export default function Navbar() {
     else navigate('/admin');
   }
 
+  const initial = user?.name ? user.name[0].toUpperCase() : user?.email ? user.email[0].toUpperCase() : 'U';
+
   return (
     <>
-      <header className="border-b border-navy-100 dark:border-navy-800 bg-white/90 dark:bg-navy-900/90 backdrop-blur sticky top-0 z-30 transition-colors duration-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-5 h-16 flex items-center justify-between gap-2">
-          {/* Brand Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <span className="w-8 h-8 rounded-full bg-navy-600 dark:bg-navy-500 text-white flex items-center justify-center font-display text-sm font-bold shadow-sm">
-              PM
-            </span>
-            <div className="leading-tight">
-              <div className="font-display font-semibold text-navy-800 dark:text-navy-100 text-[15px]">
-                PM Internship Scheme
-              </div>
-              <div className="text-[10px] tracking-widest uppercase text-navy-400 dark:text-navy-400 hidden xs:block">
-                Smart Allocation Portal
-              </div>
-            </div>
-          </Link>
+      <header className="glass-nav">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+          {/* Left Brand & Mobile Sidebar Toggle */}
+          <div className="flex items-center gap-3 shrink-0">
+            {onToggleSidebar && (
+              <button
+                onClick={onToggleSidebar}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 lg:hidden"
+                aria-label="Toggle menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            )}
 
-          {/* Right Action Icons & Auth Controls */}
+            <Link to="/" className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-display text-sm font-extrabold shadow-md shadow-indigo-500/30">
+                PM
+              </div>
+              <div className="leading-tight hidden sm:block">
+                <div className="font-display font-bold text-slate-800 dark:text-white text-[15px] tracking-tight">
+                  PM Internship Scheme
+                </div>
+                <div className="text-[9px] tracking-widest uppercase font-mono text-indigo-500 dark:text-indigo-400 font-semibold">
+                  Smart Allocation Portal
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Search Bar Input */}
+          <div className="flex-1 max-w-md hidden md:block">
+            <div className="relative">
+              <svg className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 dark:text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={search || ''}
+                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                placeholder="Search internships, skills, companies..."
+                className="w-full pl-9 pr-4 py-2 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-white/[0.06] text-xs text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/40 focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all shadow-inner"
+              />
+            </div>
+          </div>
+
+          {/* Right Action Icons & Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* 1. NOTIFICATION ICON 🔔 (if logged in) */}
+            {/* 1. NOTIFICATIONS 🔔 */}
             {user && (
               <div className="relative" ref={notifRef}>
                 <button
@@ -93,25 +124,27 @@ export default function Navbar() {
                     setShowNotifs(!showNotifs);
                     setShowSettings(false);
                   }}
-                  className="relative p-2 rounded-xl text-navy-600 dark:text-navy-300 hover:text-navy-800 dark:hover:text-white hover:bg-navy-50 dark:hover:bg-navy-800 focus:outline-none transition-all"
+                  className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
                   title="Notifications"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                   {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-saffron-500 rounded-full ring-2 ring-white dark:ring-navy-900" />
+                    <span className="absolute top-1 right-1 px-1 min-w-[16px] h-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white text-[9px] font-mono font-bold rounded-full flex items-center justify-center border border-white dark:border-[#0C0A1D]">
+                      {unreadCount}
+                    </span>
                   )}
                 </button>
 
-                {/* Notification Dropdown Panel */}
+                {/* Notifications Dropdown */}
                 {showNotifs && (
-                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-navy-900 rounded-2xl shadow-xl border border-navy-100 dark:border-navy-800 p-4 z-40 space-y-3">
-                    <div className="font-display font-semibold text-sm text-navy-800 dark:text-navy-100 border-b border-navy-100 dark:border-navy-800 pb-2 flex justify-between items-center">
+                  <div className="absolute right-0 mt-2 w-80 sm:w-96 glass-panel p-4 z-50 space-y-3">
+                    <div className="font-display font-semibold text-sm text-slate-800 dark:text-white border-b border-slate-200/60 dark:border-white/10 pb-2 flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <span>Notifications</span>
                         {unreadCount > 0 && (
-                          <span className="bg-saffron-100 dark:bg-saffron-950 text-saffron-700 dark:text-saffron-300 text-[11px] font-mono px-2 py-0.5 rounded-full font-bold">
+                          <span className="bg-indigo-500/20 text-indigo-400 text-[11px] font-mono px-2 py-0.5 rounded-full font-bold">
                             {unreadCount} new
                           </span>
                         )}
@@ -119,16 +152,16 @@ export default function Navbar() {
                       {notifications.length > 0 && (
                         <button
                           onClick={() => setUnreadCount(0)}
-                          className="text-[11px] text-navy-500 dark:text-navy-400 hover:underline"
+                          className="text-[11px] text-slate-400 hover:text-indigo-400 underline"
                         >
                           Mark all as read
                         </button>
                       )}
                     </div>
 
-                    <div className="max-h-72 overflow-y-auto space-y-2.5 pr-1">
+                    <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
                       {notifications.length === 0 ? (
-                        <div className="text-center py-6 text-navy-400 dark:text-navy-500 space-y-1">
+                        <div className="text-center py-6 text-slate-400 space-y-1">
                           <p className="text-2xl">🔔</p>
                           <p className="text-xs">No notifications yet.</p>
                         </div>
@@ -136,10 +169,10 @@ export default function Navbar() {
                         notifications.map((n) => (
                           <div
                             key={n.id}
-                            className="p-2.5 rounded-xl bg-navy-50/70 dark:bg-navy-800/60 border border-navy-100/60 dark:border-navy-700/60 text-xs text-navy-700 dark:text-navy-200 space-y-1 transition-all hover:bg-navy-50 dark:hover:bg-navy-800"
+                            className="p-2.5 rounded-xl bg-slate-100/80 dark:bg-white/[0.05] border border-slate-200/50 dark:border-white/10 text-xs text-slate-700 dark:text-slate-200 space-y-1 transition-all hover:bg-slate-200/60 dark:hover:bg-white/10"
                           >
                             <p className="leading-snug">{n.message}</p>
-                            <div className="text-[10px] font-mono text-navy-400 dark:text-navy-400">
+                            <div className="text-[10px] font-mono text-slate-400">
                               {new Date(n.created_at).toLocaleString(undefined, {
                                 month: 'short',
                                 day: 'numeric',
@@ -156,16 +189,32 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* 2. SETTINGS ICON ⚙️ */}
+            {/* 2. DIRECT THEME TOGGLE ☀️/🌙 */}
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+            >
+              {theme === 'dark' ? (
+                <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+
+            {/* 3. SETTINGS ICON ⚙️ */}
             <div className="relative" ref={settingsRef}>
               <button
                 onClick={() => {
                   setShowSettings(!showSettings);
                   setShowNotifs(false);
                 }}
-                className="p-2 rounded-xl text-navy-600 dark:text-navy-300 hover:text-navy-800 dark:hover:text-white hover:bg-navy-50 dark:hover:bg-navy-800 focus:outline-none transition-all"
+                className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
                 title="Settings"
-                aria-label="Settings"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -173,26 +222,26 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              {/* Settings Dropdown Panel */}
+              {/* Settings Dropdown */}
               {showSettings && (
-                <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-navy-900 rounded-2xl shadow-xl border border-navy-100 dark:border-navy-800 p-4 z-40 space-y-4">
-                  <div className="font-display font-semibold text-sm text-navy-800 dark:text-navy-100 border-b border-navy-100 dark:border-navy-800 pb-2 flex justify-between items-center">
+                <div className="absolute right-0 mt-2 w-72 sm:w-80 glass-panel p-4 z-50 space-y-4">
+                  <div className="font-display font-semibold text-sm text-slate-800 dark:text-white border-b border-slate-200/60 dark:border-white/10 pb-2 flex justify-between items-center">
                     <span>Preferences & Settings</span>
-                    <span className="text-xs text-navy-400 dark:text-navy-500 font-mono">⚙️</span>
+                    <span className="text-xs text-slate-400 font-mono">⚙️</span>
                   </div>
 
-                  {/* APPEARANCE SECTION */}
+                  {/* Appearance Mode */}
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-navy-500 dark:text-navy-400 block">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
                       Appearance
                     </label>
-                    <div className="grid grid-cols-3 gap-1.5 p-1 bg-navy-50 dark:bg-navy-950 rounded-xl border border-navy-100 dark:border-navy-800">
+                    <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-white/[0.05] rounded-xl border border-slate-200 dark:border-white/10">
                       <button
                         onClick={() => setTheme('light')}
                         className={`py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1 transition-all ${
                           theme === 'light'
-                            ? 'bg-white text-navy-800 shadow-sm border border-navy-200'
-                            : 'text-navy-600 dark:text-navy-400 hover:text-navy-800'
+                            ? 'bg-white text-slate-900 shadow-sm'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-800'
                         }`}
                       >
                         <span>☀️</span> Light
@@ -201,8 +250,8 @@ export default function Navbar() {
                         onClick={() => setTheme('dark')}
                         className={`py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1 transition-all ${
                           theme === 'dark'
-                            ? 'bg-navy-800 text-white shadow-sm border border-navy-700'
-                            : 'text-navy-600 dark:text-navy-400 hover:text-navy-800 dark:hover:text-navy-100'
+                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-sm'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-white'
                         }`}
                       >
                         <span>🌙</span> Dark
@@ -211,8 +260,8 @@ export default function Navbar() {
                         onClick={() => setTheme('system')}
                         className={`py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1 transition-all ${
                           theme === 'system'
-                            ? 'bg-navy-600 text-white shadow-sm'
-                            : 'text-navy-600 dark:text-navy-400 hover:text-navy-800 dark:hover:text-navy-100'
+                            ? 'bg-indigo-600 text-white shadow-sm'
+                            : 'text-slate-500 dark:text-slate-400 hover:text-white'
                         }`}
                       >
                         <span>💻</span> System
@@ -220,55 +269,55 @@ export default function Navbar() {
                     </div>
                   </div>
 
-                  {/* NOTIFICATIONS SECTION */}
-                  <div className="space-y-2 border-t border-navy-100 dark:border-navy-800 pt-3">
-                    <label className="text-xs font-bold uppercase tracking-wider text-navy-500 dark:text-navy-400 block">
+                  {/* Notifications */}
+                  <div className="space-y-2 border-t border-slate-200/60 dark:border-white/10 pt-3">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
                       Notifications
                     </label>
-                    <div className="space-y-2 text-xs text-navy-700 dark:text-navy-200">
-                      <label className="flex items-center justify-between cursor-pointer hover:opacity-90">
+                    <div className="space-y-2 text-xs text-slate-700 dark:text-slate-200">
+                      <label className="flex items-center justify-between cursor-pointer">
                         <span>Application status notifications</span>
                         <input
                           type="checkbox"
                           checked={notifPrefs.appStatus}
                           onChange={() => toggleNotifPref('appStatus')}
-                          className="w-4 h-4 rounded text-navy-600 focus:ring-navy-500 border-navy-300 dark:border-navy-700"
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-white/20"
                         />
                       </label>
-                      <label className="flex items-center justify-between cursor-pointer hover:opacity-90">
+                      <label className="flex items-center justify-between cursor-pointer">
                         <span>New application notifications</span>
                         <input
                           type="checkbox"
                           checked={notifPrefs.newApps}
                           onChange={() => toggleNotifPref('newApps')}
-                          className="w-4 h-4 rounded text-navy-600 focus:ring-navy-500 border-navy-300 dark:border-navy-700"
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-white/20"
                         />
                       </label>
                     </div>
                   </div>
 
-                  {/* ACCOUNT SECTION */}
-                  <div className="space-y-2 border-t border-navy-100 dark:border-navy-800 pt-3">
-                    <label className="text-xs font-bold uppercase tracking-wider text-navy-500 dark:text-navy-400 block">
+                  {/* Account */}
+                  <div className="space-y-2 border-t border-slate-200/60 dark:border-white/10 pt-3">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
                       Account
                     </label>
                     <div className="space-y-1 text-xs">
                       <button
                         onClick={handleProfileClick}
-                        className="w-full text-left py-1.5 px-2 rounded-lg hover:bg-navy-50 dark:hover:bg-navy-800 text-navy-700 dark:text-navy-200 font-medium flex items-center justify-between"
+                        className="w-full text-left py-1.5 px-2 rounded-lg hover:bg-white/10 text-slate-700 dark:text-slate-200 font-medium flex items-center justify-between"
                       >
                         <span>Profile & Details</span>
-                        <span className="text-navy-400">→</span>
+                        <span className="text-slate-400">→</span>
                       </button>
                       <button
                         onClick={() => {
                           setShowSettings(false);
                           setShowPasswordModal(true);
                         }}
-                        className="w-full text-left py-1.5 px-2 rounded-lg hover:bg-navy-50 dark:hover:bg-navy-800 text-navy-700 dark:text-navy-200 font-medium flex items-center justify-between"
+                        className="w-full text-left py-1.5 px-2 rounded-lg hover:bg-white/10 text-slate-700 dark:text-slate-200 font-medium flex items-center justify-between"
                       >
                         <span>Change Password</span>
-                        <span className="text-[10px] text-saffron-600 dark:text-saffron-400 font-mono bg-saffron-50 dark:bg-saffron-950 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] text-indigo-400 font-mono bg-indigo-500/10 px-1.5 py-0.5 rounded">
                           Managed
                         </span>
                       </button>
@@ -278,26 +327,38 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* 3. USER INFO & SIGN OUT BUTTONS */}
+            {/* 4. USER PROFILE & AVATAR */}
             {user ? (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-navy-600 dark:text-navy-300 hidden md:inline font-medium">
-                  {user.name || user.email}
-                  <span className="chip ml-2 capitalize font-mono text-xs">{user.role}</span>
-                </span>
+                <div className="hidden lg:flex flex-col text-right leading-tight">
+                  <span className="text-xs font-bold text-slate-800 dark:text-white">
+                    {user.name || user.email?.split('@')[0]}
+                  </span>
+                  <span className="chip text-[10px] capitalize self-end py-0 px-1.5 mt-0.5">
+                    {user.role}
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-sm shadow-md border border-white/30">
+                    {initial}
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-[#0C0A1D]" />
+                </div>
+
                 <button
                   onClick={() => { logout(); navigate('/login'); }}
-                  className="btn-secondary !px-3.5 !py-1.5 text-sm"
+                  className="btn-secondary !px-3 !py-1 text-xs"
                 >
                   Sign out
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5">
-                <Link to="/login" className="btn-secondary !px-3.5 !py-1.5 text-sm">
+              <div className="flex items-center gap-2">
+                <Link to="/login" className="btn-secondary !px-3.5 !py-1.5 text-xs">
                   Sign in
                 </Link>
-                <Link to="/register" className="btn-primary !px-3.5 !py-1.5 text-sm">
+                <Link to="/register" className="btn-primary !px-3.5 !py-1.5 text-xs">
                   Register
                 </Link>
               </div>
@@ -308,14 +369,14 @@ export default function Navbar() {
 
       {/* CHANGE PASSWORD MODAL */}
       {showPasswordModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowPasswordModal(false)}>
-          <div className="bg-white dark:bg-navy-900 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4 text-navy-800 dark:text-navy-100 border border-navy-100 dark:border-navy-800" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center border-b border-navy-100 dark:border-navy-800 pb-3">
-              <h3 className="font-display font-bold text-lg">Change Password</h3>
-              <button onClick={() => setShowPasswordModal(false)} className="text-navy-400 hover:text-navy-600 text-xl font-bold">×</button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setShowPasswordModal(false)}>
+          <div className="glass-panel max-w-md w-full p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+              <h3 className="font-display font-bold text-lg text-white">Change Password</h3>
+              <button onClick={() => setShowPasswordModal(false)} className="text-slate-400 hover:text-white text-xl font-bold">×</button>
             </div>
-            <div className="p-3 bg-navy-50 dark:bg-navy-950 rounded-xl text-xs text-navy-600 dark:text-navy-300 space-y-1">
-              <p className="font-semibold">Security Note:</p>
+            <div className="p-3 bg-white/[0.05] rounded-xl text-xs text-slate-300 space-y-1 border border-white/10">
+              <p className="font-semibold text-white">Security Note:</p>
               <p>Account credentials for the PM Internship Scheme are managed via secure single sign-on or system administrator authorization.</p>
             </div>
             <div className="space-y-3">
