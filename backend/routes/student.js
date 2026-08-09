@@ -333,16 +333,33 @@ router.post('/chatbot', async (req, res) => {
     };
   });
 
-  const { data: internships } = await supabase.from('internships').select('required_skills');
-  const demand = (internships || []).flatMap((i) => i.required_skills || []);
-  const gaps = gapAnalysis(profile.skills, demand);
+  const { data: allInternships } = await supabase.from('internships').select('*');
+  const demand = (allInternships || []).flatMap((i) => i.required_skills || []);
+  const gaps = gapAnalysis(profile ? profile.skills : [], demand);
+
+  // Compute top recommended internships for AI context
+  const companyIdsAll = [...new Set((allInternships || []).map((i) => i.company_id).filter(Boolean))];
+  const { data: allCompanies } = companyIdsAll.length
+    ? await supabase.from('company_profiles').select('user_id, name').in('user_id', companyIdsAll)
+    : { data: [] };
+  const allCompaniesById = new Map((allCompanies || []).map((c) => [c.user_id, c]));
+
+  const rankedInternships = (allInternships || []).map((i) => {
+    const match = computeMatch(profile || {}, i);
+    return {
+      title: i.title,
+      company_name: allCompaniesById.get(i.company_id)?.name || 'Verified Company',
+      match,
+    };
+  }).sort((a, b) => b.match.overall - a.match.overall).slice(0, 5);
 
   try {
     const reply = await generateLLMResponse({
       message,
-      profile,
+      profile: profile || {},
       applications: enrichedApps,
       gapAnalysis: gaps,
+      internships: rankedInternships,
     });
     res.json({ reply });
   } catch (err) {

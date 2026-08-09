@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import MatchSeal from '../components/MatchSeal';
@@ -607,6 +607,15 @@ function Assistant() {
   ]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, sending]);
 
   async function sendMessage(text) {
     if (!text || !text.trim()) return;
@@ -615,6 +624,8 @@ function Assistant() {
     try {
       const { data } = await api.post('/student/chatbot', { message: text });
       setMessages((m) => [...m, { from: 'bot', text: data.reply }]);
+    } catch (e) {
+      setMessages((m) => [...m, { from: 'bot', text: "Sorry, I encountered an issue processing that. Please try again!" }]);
     } finally {
       setSending(false);
     }
@@ -662,6 +673,7 @@ function Assistant() {
           </div>
         ))}
         {sending && <div className="text-xs text-indigo-600 dark:text-indigo-300 font-mono italic animate-pulse font-semibold">AI is thinking…</div>}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Prompt Chips */}
