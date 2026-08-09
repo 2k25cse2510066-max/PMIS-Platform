@@ -19,7 +19,9 @@ export default function Register() {
     setLoading(true);
     try {
       const user = await register(email, password, role, name);
-      navigate(user.role === 'student' ? '/student' : user.role === 'company' ? '/company' : '/admin');
+      sessionStorage.setItem('pmis_is_new_user', 'true');
+      const target = user.role === 'student' ? '/student' : user.role === 'company' ? '/company' : '/admin';
+      navigate(target, { state: { isNewUser: true } });
     } catch (err) {
       setError(err.response?.data?.error || 'Could not create account');
     } finally {

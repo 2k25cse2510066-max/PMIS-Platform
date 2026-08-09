@@ -1,17 +1,23 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import MatchSeal from '../components/MatchSeal';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/client';
 
 const TABS = ['Recommendations', 'Profile', 'Gap Analysis', 'Applications', 'Assistant'];
 
 export default function StudentDashboard() {
+  const { user } = useAuth();
+  const location = useLocation();
   const [tab, setTab] = useState('Recommendations');
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ recommendationsCount: 0, appliedCount: 0 });
   const [search, setSearch] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const isNewUser = Boolean(location.state?.isNewUser || sessionStorage.getItem('pmis_is_new_user') === 'true');
 
   const loadProfile = useCallback(() => {
     api.get('/student/profile').then((r) => setProfile(r.data));
@@ -21,7 +27,10 @@ export default function StudentDashboard() {
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
 
-  const firstName = profile?.name ? profile.name.split(' ')[0] : 'Kartik';
+  const displayName = profile?.name || user?.name || '';
+  const firstName = displayName ? displayName.split(' ')[0] : '';
+  const avatarInitial = displayName ? displayName[0].toUpperCase() : (user?.email ? user.email[0].toUpperCase() : 'S');
+  const greetingPrefix = isNewUser ? 'Welcome' : 'Welcome back';
 
   return (
     <div className="min-h-screen relative z-10">
@@ -50,11 +59,11 @@ export default function StudentDashboard() {
               <div className="space-y-2 max-w-xl">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-display font-black text-xl shadow-lg border border-white/20">
-                    {profile?.name ? profile.name[0] : 'K'}
+                    {avatarInitial}
                   </div>
                   <div>
                     <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                      Welcome back, {firstName}! 👋
+                      {greetingPrefix}{firstName ? `, ${firstName}` : ''}! 👋
                     </h1>
                     <p className="text-xs text-indigo-100/90 mt-0.5 font-medium">
                       AI-powered internship matching, real-time application tracking, and skill gap analytics.
@@ -436,7 +445,7 @@ function ProfileEditor({ profile, onSaved }) {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
-          <div><label className="label">Full Name</label><input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Kartik Verma" /></div>
+          <div><label className="label">Full Name</label><input className="input" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Enter your full name" /></div>
           <div><label className="label">Phone</label><input className="input" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Enter your phone number" /></div>
           <div><label className="label">Preferred Location</label><input className="input" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="e.g. Kanpur" /></div>
           <div>

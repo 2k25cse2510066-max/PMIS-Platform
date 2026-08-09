@@ -17,6 +17,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
+      sessionStorage.removeItem('pmis_is_new_user');
       const user = await login(email, password);
       navigate(user.role === 'student' ? '/student' : user.role === 'company' ? '/company' : '/admin');
     } catch (err) {
