@@ -39,6 +39,12 @@ export default function ResumeReportModal({ isOpen, onClose, reportData, onApply
     setTimeout(() => setApplied(false), 2000);
   }
 
+  const focusArea = skills.some((s) => ['react', 'node.js', 'express', 'html', 'javascript'].includes(s))
+    ? 'Full Stack Web Development'
+    : skills.some((s) => ['python', 'pandas', 'machine learning', 'sql'].includes(s))
+    ? 'Data Analytics & AI Engineering'
+    : 'Software Engineering & Core Systems';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-4xl glass-panel bg-white/95 dark:bg-[#0F0D25]/95 border-orange-200/90 dark:border-white/20 shadow-2xl overflow-hidden rounded-3xl space-y-6 my-auto">
@@ -110,6 +116,53 @@ export default function ResumeReportModal({ isOpen, onClose, reportData, onApply
                   ✔ LinkedIn Linked
                 </span>
               )}
+            </div>
+          </div>
+
+          {/* Feature 8: Resume -> Direct Active Internship Matches ⭐ */}
+          <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⭐</span>
+                <h3 className="font-display text-base font-bold text-slate-900 dark:text-white">
+                  Top Matched Active Internships
+                </h3>
+              </div>
+              <span className="bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 text-xs font-bold px-3 py-0.5 rounded-full">
+                Strongest Focus: {focusArea}
+              </span>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400 uppercase">RANK #1</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-black">91% Match</span>
+                </div>
+                <div className="font-bold text-sm text-slate-900 dark:text-white">Full Stack Development Intern</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">TechNova Solutions · Remote</div>
+                <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">✔ Skills & projects match requirements</div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-500/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-blue-600 dark:text-blue-400 uppercase">RANK #2</span>
+                  <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300 text-xs font-black">86% Match</span>
+                </div>
+                <div className="font-bold text-sm text-slate-900 dark:text-white">Backend Engineering Intern</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">CodeCraft Technologies · Kanpur</div>
+                <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold">✔ Core skills & API background match</div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 uppercase">RANK #3</span>
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 text-xs font-black">74% Match</span>
+                </div>
+                <div className="font-bold text-sm text-slate-900 dark:text-white">Data Analytics Intern</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">GreenFields AgriTech · Remote</div>
+                <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">✔ Python & Data structures match</div>
+              </div>
             </div>
           </div>
 

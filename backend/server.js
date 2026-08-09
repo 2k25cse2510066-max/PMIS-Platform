@@ -7,6 +7,7 @@ const studentRoutes = require('./routes/student');
 const companyRoutes = require('./routes/company');
 const adminRoutes = require('./routes/admin');
 const internshipRoutes = require('./routes/internships');
+const googleAuthRoutes = require('./routes/googleAuth');
 
 const app = express();
 app.use(cors());
@@ -19,6 +20,7 @@ app.use('/api/student', studentRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/internships', internshipRoutes);
+app.use('/api/google', googleAuthRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

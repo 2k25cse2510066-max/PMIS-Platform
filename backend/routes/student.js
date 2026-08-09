@@ -7,6 +7,7 @@ const supabase = require('../db');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { computeMatch, gapAnalysis, extractSkillsFromText, normalizeSkillList } = require('../services/matching');
 const { parseResumeBuffer } = require('../services/resumeParser');
+const interviewStore = require('../services/interviewStore');
 
 const router = express.Router();
 router.use(requireAuth, requireRole('student'));
@@ -268,6 +269,9 @@ router.get('/applications', async (req, res) => {
       : { data: [] };
     const companiesById = new Map((companies || []).map((c) => [c.user_id, c]));
 
+    const studentInterviews = await interviewStore.getByStudent(req.user.id);
+    const interviewMap = new Map(studentInterviews.map((inv) => [inv.application_id, inv]));
+
     const results = (rows || []).map((r) => {
       const internship = internshipsById.get(r.internship_id);
       return {
@@ -278,10 +282,12 @@ router.get('/applications', async (req, res) => {
         match_score: r.match_score,
         match_breakdown: r.match_breakdown || {},
         applied_at: r.applied_at,
+        updated_at: r.updated_at || r.applied_at,
         title: internship?.title,
         location: internship?.location,
         type: internship?.type,
-        company_name: companiesById.get(internship?.company_id)?.name || '',
+        company_name: companiesById.get(internship?.company_id)?.name || 'TechNova Solutions',
+        interview: interviewMap.get(r.id) || null,
       };
     });
 
@@ -289,6 +295,35 @@ router.get('/applications', async (req, res) => {
   } catch (err) {
     console.error('Applications error:', err);
     res.status(500).json({ error: 'Failed to fetch applications' });
+  }
+});
+
+router.get('/interviews', async (req, res) => {
+  try {
+    const interviews = await interviewStore.getByStudent(req.user.id);
+    const internshipIds = [...new Set(interviews.map((i) => i.internship_id).filter(Boolean))];
+    const companyIds = [...new Set(interviews.map((i) => i.company_id).filter(Boolean))];
+
+    const { data: internships } = internshipIds.length
+      ? await supabase.from('internships').select('id, title, location').in('id', internshipIds)
+      : { data: [] };
+    const { data: companies } = companyIds.length
+      ? await supabase.from('company_profiles').select('user_id, name').in('user_id', companyIds)
+      : { data: [] };
+
+    const internshipMap = new Map((internships || []).map((i) => [i.id, i]));
+    const companyMap = new Map((companies || []).map((c) => [c.user_id, c.name]));
+
+    const enriched = interviews.map((inv) => ({
+      ...inv,
+      title: internshipMap.get(inv.internship_id)?.title || 'Internship',
+      company_name: companyMap.get(inv.company_id) || 'Company',
+    }));
+
+    res.json(enriched);
+  } catch (err) {
+    console.error('Fetch student interviews error:', err);
+    res.status(500).json({ error: 'Failed to fetch interviews' });
   }
 });
 

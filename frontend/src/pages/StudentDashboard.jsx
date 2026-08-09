@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import MatchSeal from '../components/MatchSeal';
 import { useAuth } from '../context/AuthContext';
 import ResumeReportModal from '../components/ResumeReportModal';
+import InternshipCompareModal from '../components/InternshipCompareModal';
 import api from '../api/client';
 
 const TABS = ['Recommendations', 'Profile', 'Gap Analysis', 'Applications', 'Assistant'];
@@ -102,6 +103,58 @@ export default function StudentDashboard() {
             </div>
           </div>
 
+          {/* Feature 7: Profile Strength & Completion Score Card */}
+          <div className="glass-card p-5 border-slate-200/90 dark:border-white/15 bg-gradient-to-r from-slate-900/90 via-indigo-950/90 to-slate-900/90 text-white rounded-3xl space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-extrabold text-sm text-white">Profile Strength</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold text-xs border border-emerald-500/30">
+                    {Math.min(100, (profile?.name ? 15 : 0) + (profile?.phone ? 15 : 0) + (profile?.location ? 15 : 0) + (profile?.cgpa ? 15 : 0) + ((profile?.skills || []).length >= 3 ? 20 : 0) + ((profile?.projects || []).length >= 1 ? 10 : 0) + (profile?.resume_filename ? 10 : 0))}% Complete
+                  </span>
+                </div>
+                {/* Progress Bar */}
+                <div className="w-64 h-2.5 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-400 rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min(100, (profile?.name ? 15 : 0) + (profile?.phone ? 15 : 0) + (profile?.location ? 15 : 0) + (profile?.cgpa ? 15 : 0) + ((profile?.skills || []).length >= 3 ? 20 : 0) + ((profile?.projects || []).length >= 1 ? 10 : 0) + (profile?.resume_filename ? 10 : 0))}%` }}
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={() => setTab('Profile')}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-95 shrink-0 self-start sm:self-center"
+              >
+                Complete Profile →
+              </button>
+            </div>
+
+            {/* Checklist */}
+            <div className="flex flex-wrap gap-3 text-xs pt-1 border-t border-white/10">
+              <span className={`flex items-center gap-1 font-semibold ${profile?.name && profile?.phone && profile?.location ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <span>{profile?.name && profile?.phone && profile?.location ? '✓' : '⚠'}</span>
+                <span>Basic Information</span>
+              </span>
+              <span className={`flex items-center gap-1 font-semibold ${(profile?.skills || []).length >= 3 ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <span>{(profile?.skills || []).length >= 3 ? '✓' : '⚠'}</span>
+                <span>Skills</span>
+              </span>
+              <span className={`flex items-center gap-1 font-semibold ${profile?.resume_filename ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <span>{profile?.resume_filename ? '✓' : '⚠'}</span>
+                <span>Resume</span>
+              </span>
+              <span className={`flex items-center gap-1 font-semibold ${(profile?.projects || []).length >= 1 ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <span>{(profile?.projects || []).length >= 1 ? '✓' : '⚠'}</span>
+                <span>Projects</span>
+              </span>
+              <span className={`flex items-center gap-1 font-semibold ${profile?.cgpa ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <span>{profile?.cgpa ? '✓' : '⚠'}</span>
+                <span>CGPA</span>
+              </span>
+            </div>
+          </div>
+
           {/* Segmented Glass Tab Navigation */}
           <div className="flex gap-2 p-1.5 glass-panel !rounded-2xl border-slate-200/90 dark:border-white/15 overflow-x-auto">
             {TABS.map((t) => (
@@ -149,6 +202,21 @@ function Recommendations({ profile, onApplied, search }) {
   const [sectorFilter, setSectorFilter] = useState('All');
   const [minScore, setMinScore] = useState('0');
   const [showFilters, setShowFilters] = useState(true);
+  // Comparison State
+  const [selectedForCompare, setSelectedForCompare] = useState([]);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+
+  function toggleCompare(item) {
+    if (selectedForCompare.some((c) => c.id === item.id)) {
+      setSelectedForCompare(selectedForCompare.filter((c) => c.id !== item.id));
+    } else {
+      if (selectedForCompare.length >= 3) {
+        alert('You can compare up to 3 internships at a time.');
+        return;
+      }
+      setSelectedForCompare([...selectedForCompare, item]);
+    }
+  }
 
   const activeSearch = search || localSearch;
 
@@ -444,8 +512,43 @@ function Recommendations({ profile, onApplied, search }) {
         <EmptyState text="No internships match your filter criteria." />
       ) : (
         filteredItems.map((i) => (
-          <div key={i.id} className="glass-card p-6 border-slate-200/90 dark:border-white/15 hover:border-indigo-500/40 transition-all rounded-3xl">
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div key={i.id} className="glass-card p-6 border-slate-200/90 dark:border-white/15 hover:border-indigo-500/40 transition-all rounded-3xl space-y-3">
+            
+            {/* Top Smart Recommendation Rationale Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-white/[0.06] text-xs">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-[10px]">
+                  🔥 Recommended for you
+                </span>
+                <span className="text-slate-600 dark:text-slate-300 font-medium">
+                  You match <strong className="text-indigo-600 dark:text-amber-400 font-black">{i.match.overall}%</strong> of this internship. Your <strong className="text-slate-800 dark:text-white">{i.match.matchedSkills.slice(0, 2).join(' + ') || 'core'}</strong> skills match the requirements.
+                </span>
+              </div>
+
+              {/* Urgency Badges & Compare Checkbox */}
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 text-[10px] font-bold">
+                  🔴 Only {i.seats || 2} seats left
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[10px] font-bold">
+                  🟠 Closes in 2 days
+                </span>
+
+                <label className="flex items-center gap-1.5 cursor-pointer ml-2 bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-white/15">
+                  <input
+                    type="checkbox"
+                    checked={selectedForCompare.some((c) => c.id === i.id)}
+                    onChange={() => toggleCompare(i)}
+                    className="w-3.5 h-3.5 rounded text-orange-500 focus:ring-orange-400"
+                  />
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200">
+                    Compare
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pt-1">
               
               {/* Left & Main Info Column */}
               <div className="flex items-start sm:items-center gap-5 flex-1 min-w-0">
@@ -453,13 +556,6 @@ function Recommendations({ profile, onApplied, search }) {
                 <MatchSeal score={i.match.overall} size={76} />
 
                 <div className="space-y-1.5 min-w-0">
-                  {/* Top Match Badge */}
-                  {i.match.overall >= 50 && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[10px] font-bold">
-                      ⭐ Top Match
-                    </span>
-                  )}
-
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                       {i.title}
@@ -558,6 +654,38 @@ function Recommendations({ profile, onApplied, search }) {
           </div>
         ))
       )}
+
+      {/* Floating Comparison Toolbar */}
+      {selectedForCompare.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 glass-panel p-4 bg-slate-900/95 text-white border-white/20 shadow-2xl flex items-center gap-4 rounded-2xl animate-fade-in">
+          <span className="text-xs font-mono font-bold text-amber-300">
+            ⚖️ {selectedForCompare.length} / 3 Selected for Comparison
+          </span>
+          <button
+            onClick={() => setShowCompareModal(true)}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+          >
+            Compare Internships ⚖️
+          </button>
+          <button
+            onClick={() => setSelectedForCompare([])}
+            className="text-xs text-slate-400 hover:text-white font-bold"
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
+      {/* Internship Compare Modal */}
+      <InternshipCompareModal
+        isOpen={showCompareModal}
+        onClose={() => setShowCompareModal(false)}
+        internships={selectedForCompare}
+        onApply={(item) => {
+          setSelectedInternship(item);
+          setShowCompareModal(false);
+        }}
+      />
 
       {/* APPLICATION DETAILS FORM MODAL */}
       {selectedInternship && (
@@ -886,6 +1014,79 @@ function GapAnalysis() {
   );
 }
 
+function ApplicationTimelineStepper({ status }) {
+  const STAGES = [
+    { key: 'applied', label: 'Applied', icon: '📝' },
+    { key: 'under_review', label: 'Under Review', icon: '🔍' },
+    { key: 'shortlisted', label: 'Shortlisted', icon: '⭐' },
+    { key: 'interview', label: 'Interview', icon: '📅' },
+    { key: 'offered', label: 'Selected', icon: '🎉' },
+  ];
+
+  const statusMap = {
+    applied: 1,
+    pending: 1,
+    under_review: 2,
+    shortlisted: 3,
+    interview: 4,
+    offered: 5,
+    accepted: 5,
+    rejected: -1,
+  };
+
+  const currentStep = statusMap[status?.toLowerCase()] || 1;
+  const isRejected = status?.toLowerCase() === 'rejected';
+
+  return (
+    <div className="w-full pt-3 pb-1">
+      <div className="flex items-center justify-between relative max-w-xl mx-auto">
+        {/* Progress connecting line */}
+        <div className="absolute left-6 right-6 top-4 h-1 bg-slate-200 dark:bg-white/10 z-0">
+          <div
+            className={`h-full transition-all duration-500 ${
+              isRejected ? 'bg-rose-500' : 'bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500'
+            }`}
+            style={{ width: isRejected ? '100%' : `${Math.max(0, (currentStep - 1) * 25)}%` }}
+          />
+        </div>
+
+        {STAGES.map((s, idx) => {
+          const stepNum = idx + 1;
+          const isPassed = !isRejected && currentStep >= stepNum;
+          const isCurrent = !isRejected && currentStep === stepNum;
+
+          return (
+            <div key={s.key} className="relative z-10 flex flex-col items-center group">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all border-2 ${
+                  isRejected && stepNum === 5
+                    ? 'bg-rose-500 text-white border-rose-600 shadow-md'
+                    : isPassed
+                    ? 'bg-emerald-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20'
+                    : 'bg-white dark:bg-[#12142E] text-slate-400 border-slate-300 dark:border-white/20'
+                }`}
+              >
+                {isPassed ? (isCurrent ? s.icon : '✓') : stepNum}
+              </div>
+              <span
+                className={`text-[10px] font-bold mt-1.5 whitespace-nowrap transition-colors ${
+                  isCurrent
+                    ? 'text-indigo-600 dark:text-amber-400 font-black'
+                    : isPassed
+                    ? 'text-slate-900 dark:text-white'
+                    : 'text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                {isRejected && stepNum === 5 ? 'Rejected' : s.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------------------
 function Applications() {
   const [apps, setApps] = useState(null);
@@ -903,21 +1104,105 @@ function Applications() {
   if (apps.length === 0) return <EmptyState text="You haven't applied to anything yet — check Recommendations." />;
 
   return (
-    <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
-      <h2 className="font-display font-bold text-xl text-slate-900 dark:text-white">Your Applications</h2>
-      <div className="divide-y divide-slate-200 dark:divide-white/10 space-y-3">
-        {apps.map((a) => (
-          <div key={a.id} className="pt-3 flex items-center gap-4">
-            <MatchSeal score={a.match_score} size={48} />
-            <div className="flex-1 min-w-0">
-              <div className="font-display font-bold text-sm text-slate-900 dark:text-white">{a.title}</div>
-              <div className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">{a.company_name} · {a.location} · applied {new Date(a.applied_at).toLocaleDateString()}</div>
+    <div className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-6">
+      <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+        <div>
+          <h2 className="font-display font-bold text-xl text-slate-900 dark:text-white">Your Applications & Status Timeline</h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400">Track real-time progress as companies review, shortlist, and interview your profile.</p>
+        </div>
+        <span className="chip font-mono font-bold text-xs">{apps.length} Applications</span>
+      </div>
+
+      <div className="space-y-6">
+        {apps.map((a) => {
+          const inv = a.interview;
+          let scheduledDateStr = '';
+          let scheduledTimeStr = '';
+          if (inv && inv.scheduled_at) {
+            const d = new Date(inv.scheduled_at);
+            scheduledDateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            scheduledTimeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          }
+
+          return (
+            <div key={a.id} className="p-5 sm:p-6 rounded-3xl bg-slate-100/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 space-y-4 shadow-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <MatchSeal score={a.match_score} size={56} />
+                  <div>
+                    <div className="font-display font-extrabold text-base sm:text-lg text-slate-900 dark:text-white">{a.title}</div>
+                    <div className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">
+                      <strong className="text-orange-600 dark:text-amber-400">{a.company_name}</strong> · {a.location} · applied {new Date(a.applied_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+
+                <span className={`px-3.5 py-1 rounded-full text-xs font-mono font-bold capitalize border backdrop-blur-md ${statusBadgeStyle[a.status] || 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-white/20'}`}>
+                  Status: {a.status === 'interview' ? 'Interview Scheduled' : a.status}
+                </span>
+              </div>
+
+              {/* 5-Stage Interactive Progress Timeline */}
+              <div className="pt-2 border-t border-slate-200/60 dark:border-white/[0.06]">
+                <ApplicationTimelineStepper status={a.status} />
+              </div>
+
+              {/* Feature 5: Interview Scheduled Details Card */}
+              {(a.status === 'interview' || inv) && (
+                <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-900/90 via-indigo-900/90 to-purple-900/90 text-white border border-white/20 shadow-xl space-y-3 animate-fade-in mt-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/15 pb-3">
+                    <div className="space-y-0.5">
+                      <span className="text-[10px] uppercase font-mono font-bold text-amber-300 tracking-wider">
+                        🎥 Official Interview Scheduled
+                      </span>
+                      <h4 className="font-display text-lg font-extrabold text-white">
+                        {a.title}
+                      </h4>
+                      <p className="text-xs text-indigo-100">
+                        Interview scheduled by <strong className="text-white">{a.company_name}</strong>
+                      </p>
+                    </div>
+
+                    {inv?.meeting_url && (
+                      <a
+                        href={inv.meeting_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-saffron text-xs !py-2.5 !px-5 shadow-lg active:scale-95 transition-all self-start sm:self-center shrink-0 flex items-center gap-2"
+                      >
+                        <span>🎥 Join Google Meet</span>
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 text-xs text-center">
+                    <div className="p-2.5 rounded-xl bg-white/10 border border-white/15">
+                      <span className="text-[10px] text-slate-300 uppercase font-bold block font-mono">📅 Date</span>
+                      <span className="font-extrabold text-white text-xs">{scheduledDateStr || '14 August 2026'}</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white/10 border border-white/15">
+                      <span className="text-[10px] text-slate-300 uppercase font-bold block font-mono">🕐 Time</span>
+                      <span className="font-extrabold text-white text-xs">{scheduledTimeStr || '3:00 PM'}</span>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-white/10 border border-white/15">
+                      <span className="text-[10px] text-slate-300 uppercase font-bold block font-mono">⏱ Duration</span>
+                      <span className="font-extrabold text-white text-xs">{inv?.duration || 30} minutes</span>
+                    </div>
+                  </div>
+
+                  {inv?.notes && (
+                    <div className="text-xs text-indigo-100 bg-white/10 p-3 rounded-xl border border-white/15">
+                      <strong className="text-white">Interviewer Notes:</strong> {inv.notes}
+                    </div>
+                  )}
+                </div>
+              )}
+
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize border backdrop-blur-md ${statusBadgeStyle[a.status] || 'bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-white/20'}`}>
-              {a.status}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
