@@ -97,7 +97,7 @@ export default function Login() {
                 onClick={() => fill('student')}
                 className={`px-3 py-2.5 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all ${
                   activeDemo === 'student'
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 border border-white/20'
+                    ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white shadow-lg shadow-orange-500/20 dark:shadow-indigo-500/30 border border-white/20'
                     : 'bg-white dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/15 hover:bg-slate-200/60 dark:hover:bg-white/20'
                 }`}
               >
@@ -114,7 +114,7 @@ export default function Login() {
                 onClick={() => fill('company')}
                 className={`px-3 py-2.5 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all ${
                   activeDemo === 'company'
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 border border-white/20'
+                    ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white shadow-lg shadow-orange-500/20 dark:shadow-indigo-500/30 border border-white/20'
                     : 'bg-white dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/15 hover:bg-slate-200/60 dark:hover:bg-white/20'
                 }`}
               >
@@ -131,7 +131,7 @@ export default function Login() {
                 onClick={() => fill('admin')}
                 className={`px-3 py-2.5 rounded-xl text-xs font-bold flex flex-col items-center justify-center gap-0.5 transition-all ${
                   activeDemo === 'admin'
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 border border-white/20'
+                    ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white shadow-lg shadow-orange-500/20 dark:shadow-indigo-500/30 border border-white/20'
                     : 'bg-white dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/15 hover:bg-slate-200/60 dark:hover:bg-white/20'
                 }`}
               >

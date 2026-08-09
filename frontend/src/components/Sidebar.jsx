@@ -72,7 +72,7 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
                   }}
                   className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/25 border border-white/20'
+                      ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white shadow-md shadow-orange-500/20 dark:shadow-indigo-500/25 border border-white/20'
                       : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/[0.08]'
                   }`}
                 >
@@ -88,7 +88,7 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
           {/* Premium Feature Card with Interactive Early Access Preview */}
           <div
             onClick={() => setShowPremiumModal(true)}
-            className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-blue-500/10 border border-indigo-500/20 dark:border-white/15 backdrop-blur-md space-y-2.5 cursor-pointer hover:border-indigo-500/40 hover:shadow-lg transition-all group"
+            className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-amber-500/10 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-blue-500/10 border border-amber-500/20 dark:border-white/15 backdrop-blur-md space-y-2.5 cursor-pointer hover:border-amber-500/40 dark:hover:border-indigo-500/40 hover:shadow-lg transition-all group"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5">
@@ -108,7 +108,7 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
                 e.stopPropagation();
                 setShowPremiumModal(true);
               }}
-              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md hover:from-blue-500 hover:to-purple-500 transition-all active:scale-95 flex items-center justify-center gap-1"
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white text-xs font-bold shadow-md shadow-orange-500/20 dark:shadow-indigo-500/25 hover:from-orange-400 hover:to-amber-500 dark:hover:from-blue-500 dark:hover:to-purple-500 transition-all active:scale-95 flex items-center justify-center gap-1"
             >
               <span>Explore Features</span>
               <span>→</span>

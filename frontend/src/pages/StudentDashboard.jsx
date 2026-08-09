@@ -54,7 +54,7 @@ export default function StudentDashboard() {
         {/* Main Content Panel */}
         <main className="flex-1 min-w-0 space-y-6">
           {/* Welcome Banner Card */}
-          <div className="glass-panel p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-blue-900/80 via-indigo-900/80 to-purple-900/80 text-white border-slate-200/90 dark:border-white/15">
+          <div className="glass-panel p-6 sm:p-8 relative overflow-hidden bg-gradient-to-r from-blue-900/90 via-indigo-900/90 to-purple-900/90 text-white border-slate-200/90 dark:border-white/15 shadow-xl">
             <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="space-y-2 max-w-xl">
                 <div className="flex items-center gap-3">
@@ -109,7 +109,7 @@ export default function StudentDashboard() {
                 onClick={() => setTab(t)}
                 className={`px-5 py-2.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 ${
                   tab === t
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
+                    ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white shadow-md shadow-orange-500/20 dark:shadow-indigo-500/30'
                     : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10'
                 }`}
               >

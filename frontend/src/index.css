@@ -7,9 +7,9 @@ html {
 }
 
 body {
-  @apply bg-[#EEF3FA] text-slate-900 font-sans antialiased selection:bg-indigo-500 selection:text-white
-         dark:bg-[#0C0A1D] dark:text-slate-100 transition-colors duration-200 min-h-screen relative overflow-x-hidden;
-  background-image: linear-gradient(135deg, #EEF3FA 0%, #E3EDF9 50%, #D8E3F5 100%);
+  @apply bg-[#F8FAFC] text-slate-900 font-sans antialiased selection:bg-orange-500 selection:text-white
+         dark:bg-[#0C0A1D] dark:text-slate-100 dark:selection:bg-indigo-500 transition-colors duration-200 min-h-screen relative overflow-x-hidden;
+  background-image: linear-gradient(135deg, #FAF8F5 0%, #F1F5F9 50%, #E9EFF8 100%);
 }
 
 .dark body {
@@ -25,7 +25,7 @@ body::before {
   width: 50vw;
   height: 50vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, rgba(251, 146, 60, 0.05) 50%, transparent 70%);
   filter: blur(80px);
   pointer-events: none;
   z-index: 0;
@@ -42,7 +42,7 @@ body::after {
   width: 55vw;
   height: 55vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(59, 130, 246, 0.1) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.08) 0%, rgba(99, 102, 241, 0.05) 50%, transparent 70%);
   filter: blur(90px);
   pointer-events: none;
   z-index: 0;
@@ -70,19 +70,19 @@ body::after {
   background: rgba(139, 92, 246, 0.35);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.7);
+  background: rgba(249, 115, 22, 0.7);
 }
 
 /* Focus ring visible for keyboard nav */
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid #8B5CF6;
+  outline: 2px solid #F97316;
   outline-offset: 2px;
 }
 
 @layer components {
   /* Glassmorphism Panel & Card Classes */
   .glass-panel {
-    @apply relative bg-white/80 dark:bg-white/[0.07] backdrop-blur-xl border border-slate-200/90 dark:border-white/10 shadow-xl rounded-3xl text-slate-900 dark:text-white transition-all duration-300;
+    @apply relative bg-white/85 dark:bg-white/[0.07] backdrop-blur-xl border border-slate-200/90 dark:border-white/10 shadow-xl rounded-3xl text-slate-900 dark:text-white transition-all duration-300;
   }
   
   .stub-card, .glass-card {
@@ -100,21 +100,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
   /* Match Score Ring */
   .seal {
-    @apply relative flex items-center justify-center rounded-full border-[3px] border-indigo-500/80 text-slate-900 dark:text-white font-mono font-bold shadow-md;
-    background: repeating-conic-gradient(#EEF2FF 0deg 2deg, transparent 2deg 12deg);
+    @apply relative flex items-center justify-center rounded-full border-[3px] border-orange-500/80 dark:border-indigo-500/80 text-slate-900 dark:text-white font-mono font-bold shadow-md;
+    background: repeating-conic-gradient(#FFF3EC 0deg 2deg, transparent 2deg 12deg);
   }
   .dark .seal {
     background: repeating-conic-gradient(#1E1B4B 0deg 2deg, transparent 2deg 12deg);
   }
 
-  /* Premium Gradient Buttons */
+  /* Premium Buttons */
   .btn-primary, .btn-gradient {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-5 py-2.5 font-semibold text-sm
-           hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 active:scale-[0.98] shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white px-5 py-2.5 font-semibold text-sm
+           hover:from-orange-400 hover:to-amber-500 dark:hover:from-blue-500 dark:hover:to-purple-500 active:scale-[0.98] shadow-lg shadow-orange-500/20 dark:shadow-indigo-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
   }
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-white/20 text-slate-700 dark:text-white bg-white/80 dark:bg-white/[0.08] backdrop-blur-md px-5 py-2.5 font-semibold text-sm
-           hover:bg-white dark:hover:bg-white/[0.15] hover:border-slate-400 dark:hover:border-white/30 active:scale-[0.98] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+           hover:bg-slate-100 dark:hover:bg-white/[0.15] hover:border-slate-400 dark:hover:border-white/30 active:scale-[0.98] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-saffron {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white px-5 py-2.5 font-semibold text-sm
@@ -124,7 +124,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   /* Translucent Form Controls */
   .input {
     @apply w-full rounded-xl border border-slate-300 dark:border-white/15 bg-white/90 dark:bg-white/[0.06] backdrop-blur-md px-4 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/40
-           focus:border-indigo-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/30 outline-none transition-all shadow-sm;
+           focus:border-orange-500 dark:focus:border-indigo-400 focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-indigo-500/30 outline-none transition-all shadow-sm;
   }
   .label {
     @apply block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5;
@@ -132,10 +132,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
   /* Badges & Chips */
   .chip {
-    @apply inline-flex items-center gap-1 rounded-lg border border-indigo-400/40 dark:border-indigo-500/30 bg-indigo-500/10 dark:bg-indigo-500/20 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 backdrop-blur-sm;
+    @apply inline-flex items-center gap-1 rounded-lg border border-orange-400/40 dark:border-indigo-500/30 bg-orange-500/10 dark:bg-indigo-500/20 px-2.5 py-1 text-xs font-semibold text-orange-800 dark:text-indigo-300 backdrop-blur-sm;
   }
   .chip-missing {
-    @apply inline-flex items-center gap-1 rounded-lg border border-amber-500/40 dark:border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 backdrop-blur-sm;
+    @apply inline-flex items-center gap-1 rounded-lg border border-amber-500/40 dark:border-amber-500/30 bg-amber-500/10 dark:bg-amber-500/20 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:text-amber-300 backdrop-blur-sm;
   }
 
   .stat-card {

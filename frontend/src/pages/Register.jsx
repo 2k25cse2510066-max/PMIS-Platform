@@ -47,7 +47,7 @@ export default function Register() {
                 onClick={() => setRole(r)}
                 className={`rounded-xl border px-3 py-2.5 text-xs font-bold capitalize transition-all ${
                   role === r
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/30 border-white/20'
+                    ? 'bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 dark:from-blue-600 dark:via-indigo-600 dark:to-purple-600 text-white shadow-lg shadow-orange-500/20 dark:shadow-indigo-500/30 border-white/20'
                     : 'bg-white dark:bg-white/10 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-white/15 hover:bg-slate-200/60 dark:hover:bg-white/20'
                 }`}
               >

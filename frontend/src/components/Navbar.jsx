@@ -84,14 +84,14 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
             )}
 
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-display text-sm font-black shadow-md shadow-indigo-500/30">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-orange-500 via-amber-500 to-orange-600 text-white flex items-center justify-center font-display text-sm font-black shadow-md shadow-orange-500/30">
                 PM
               </div>
               <div className="leading-tight hidden sm:block">
                 <div className="font-display font-extrabold text-slate-900 dark:text-white text-[15px] tracking-tight">
                   PM Internship Scheme
                 </div>
-                <div className="text-[9px] tracking-widest uppercase font-mono text-indigo-600 dark:text-indigo-400 font-bold">
+                <div className="text-[9px] tracking-widest uppercase font-mono text-orange-600 dark:text-orange-400 font-bold">
                   Smart Allocation Portal
                 </div>
               </div>
@@ -350,7 +350,7 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
                 </div>
 
                 <div className="relative">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-black text-sm shadow-md border border-white/30">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-black text-sm shadow-md border border-white/30">
                     {initial}
                   </div>
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-[#0C0A1D]" />
