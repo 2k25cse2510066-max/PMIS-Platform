@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import MatchSeal from '../components/MatchSeal';
 import { useAuth } from '../context/AuthContext';
+import ResumeReportModal from '../components/ResumeReportModal';
 import api from '../api/client';
 
 const TABS = ['Recommendations', 'Profile', 'Gap Analysis', 'Applications', 'Assistant'];
@@ -138,8 +139,16 @@ function Recommendations({ profile, onApplied, search }) {
   const [coverNote, setCoverNote] = useState('');
   const [expanded, setExpanded] = useState(null);
   const [localSearch, setLocalSearch] = useState('');
+
+  // PMIS Filter States
+  const [providerFilter, setProviderFilter] = useState('All');
+  const [stipendFilter, setStipendFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
+  const [durationFilter, setDurationFilter] = useState('All');
+  const [educationFilter, setEducationFilter] = useState('All');
+  const [sectorFilter, setSectorFilter] = useState('All');
   const [minScore, setMinScore] = useState('0');
+  const [showFilters, setShowFilters] = useState(true);
 
   const activeSearch = search || localSearch;
 
@@ -162,124 +171,389 @@ function Recommendations({ profile, onApplied, search }) {
     }
   }
 
+  function resetFilters() {
+    setLocalSearch('');
+    setProviderFilter('All');
+    setStipendFilter('All');
+    setTypeFilter('All');
+    setDurationFilter('All');
+    setEducationFilter('All');
+    setSectorFilter('All');
+    setMinScore('0');
+  }
+
   if (!items) return <SkeletonList />;
   if (items.length === 0) return <EmptyState text="No internships posted yet. Check back soon." />;
+
+  // Unique Providers List
+  const uniqueProviders = [...new Set(items.map((i) => i.company_name).filter(Boolean))];
+
+  // Helper to parse numeric stipend amount
+  function parseStipendVal(stipendStr) {
+    if (!stipendStr) return 0;
+    const num = stipendStr.replace(/[^0-9]/g, '');
+    return num ? Number(num) : 0;
+  }
 
   const filteredItems = items.filter((i) => {
     const q = activeSearch.toLowerCase();
     const matchesSearch =
+      !q ||
       i.title.toLowerCase().includes(q) ||
       (i.company_name && i.company_name.toLowerCase().includes(q)) ||
       i.location.toLowerCase().includes(q) ||
       i.required_skills.some((s) => s.toLowerCase().includes(q));
 
+    const matchesProvider = providerFilter === 'All' || i.company_name === providerFilter;
     const matchesType = typeFilter === 'All' || i.type === typeFilter;
     const matchesScore = i.match.overall >= Number(minScore);
 
-    return matchesSearch && matchesType && matchesScore;
+    // Stipend Filter
+    let matchesStipend = true;
+    const val = parseStipendVal(i.stipend);
+    if (stipendFilter === '10k+') matchesStipend = val >= 10000;
+    else if (stipendFilter === '20k+') matchesStipend = val >= 20000;
+    else if (stipendFilter === '30k+') matchesStipend = val >= 30000;
+
+    // Duration Filter
+    let matchesDuration = true;
+    if (durationFilter !== 'All') {
+      const durText = (i.description || '' + i.title).toLowerCase();
+      if (durationFilter === '1 Month') matchesDuration = /1 month|4 week/i.test(durText);
+      else if (durationFilter === '2-3 Months') matchesDuration = /2 month|3 month|8 week|12 week/i.test(durText);
+      else if (durationFilter === '6 Months') matchesDuration = /6 month|24 week/i.test(durText);
+    }
+
+    // Educational Qualification Filter
+    let matchesEducation = true;
+    if (educationFilter !== 'All') {
+      const reqText = (i.description || '' + i.title + ' ' + (i.required_skills || []).join(' ')).toLowerCase();
+      if (educationFilter === 'B.Tech / B.E.') matchesEducation = !/diploma only/i.test(reqText);
+      else if (educationFilter === 'BCA / MCA') matchesEducation = /bca|mca|computer|software|web/i.test(reqText);
+      else if (educationFilter === 'Diploma') matchesEducation = /diploma|polytechnic|any degree/i.test(reqText);
+    }
+
+    // Sector / Industry Filter
+    let matchesSector = true;
+    if (sectorFilter !== 'All') {
+      const sectorText = (i.title + ' ' + (i.required_skills || []).join(' ')).toLowerCase();
+      if (sectorFilter === 'IT & Software') matchesSector = /web|software|frontend|backend|node|react|java|c\+\+/i.test(sectorText);
+      else if (sectorFilter === 'AI & Data Science') matchesSector = /data|machine learning|python|ai|analytics/i.test(sectorText);
+      else if (sectorFilter === 'E-Commerce & Mobile') matchesSector = /ecommerce|mobile|app|flutter|android|design/i.test(sectorText);
+      else if (sectorFilter === 'Finance & Fintech') matchesSector = /finance|account|fintech|bank|analyst/i.test(sectorText);
+    }
+
+    return matchesSearch && matchesProvider && matchesType && matchesScore && matchesStipend && matchesDuration && matchesEducation && matchesSector;
   });
+
+  const activeCount = [
+    localSearch,
+    providerFilter !== 'All',
+    stipendFilter !== 'All',
+    typeFilter !== 'All',
+    durationFilter !== 'All',
+    educationFilter !== 'All',
+    sectorFilter !== 'All',
+    minScore !== '0',
+  ].filter(Boolean).length;
 
   return (
     <div className="space-y-4">
-      {/* Filter Bar */}
-      <div className="glass-card p-4 grid sm:grid-cols-3 gap-3 border-slate-200/90 dark:border-white/15">
-        <input
-          type="text"
-          placeholder="Search by title, skill, company..."
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
-          className="input text-xs"
-        />
-        <select
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
-        >
-          <option value="All">All Types (Remote / On-site / Hybrid)</option>
-          <option value="Remote">Remote</option>
-          <option value="On-site">On-site</option>
-          <option value="Hybrid">Hybrid</option>
-        </select>
-        <select
-          value={minScore}
-          onChange={(e) => setMinScore(e.target.value)}
-          className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
-        >
-          <option value="0">All Match Scores</option>
-          <option value="60">60%+ Match</option>
-          <option value="75">75%+ Match</option>
-          <option value="85">85%+ Match</option>
-        </select>
+      {/* Search & Top Action Bar */}
+      <div className="glass-card p-4 space-y-4 border-slate-200/90 dark:border-white/15">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="relative flex-1 w-full">
+            <span className="absolute left-3.5 top-2.5 text-slate-400 text-sm">🔍</span>
+            <input
+              type="text"
+              placeholder="Search by title, skills, location or company..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              className="input text-xs !pl-9"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 bg-white dark:bg-white/10 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/20 transition-all flex items-center gap-2"
+            >
+              <span>⚙️ Filter Options</span>
+              {activeCount > 0 && (
+                <span className="bg-orange-500 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full">
+                  {activeCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={resetFilters}
+              className="px-4 py-2.5 rounded-xl bg-amber-600/90 hover:bg-amber-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-1.5 shrink-0"
+              title="Reset all active filters"
+            >
+              <span>🔄</span>
+              <span>RESET</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Detailed PMIS Filter Grid */}
+        {showFilters && (
+          <div className="pt-3 border-t border-slate-200 dark:border-white/10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 animate-fade-in">
+            
+            {/* Filter 1: Internship Provider */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>🏢</span> Internship Provider
+              </label>
+              <select
+                value={providerFilter}
+                onChange={(e) => setProviderFilter(e.target.value)}
+                className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
+              >
+                <option value="All">All Providers (Companies)</option>
+                {uniqueProviders.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filter 2: Internship Fee / Stipend */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>₹</span> Internship Fee / Stipend
+              </label>
+              <select
+                value={stipendFilter}
+                onChange={(e) => setStipendFilter(e.target.value)}
+                className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
+              >
+                <option value="All">All Stipends / Fees</option>
+                <option value="10k+">₹10,000 / month & above</option>
+                <option value="20k+">₹20,000 / month & above</option>
+                <option value="30k+">₹30,000 / month & above</option>
+              </select>
+            </div>
+
+            {/* Filter 3: Mode of Internship */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>💼</span> Mode of Internship
+              </label>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
+              >
+                <option value="All">All Modes (Remote / On-site / Hybrid)</option>
+                <option value="Remote">Remote (Work from Home)</option>
+                <option value="On-site">On-site (Office)</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+            </div>
+
+            {/* Filter 4: Internship Duration */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>⏱️</span> Internship Duration
+              </label>
+              <select
+                value={durationFilter}
+                onChange={(e) => setDurationFilter(e.target.value)}
+                className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
+              >
+                <option value="All">All Durations</option>
+                <option value="1 Month">1 Month</option>
+                <option value="2-3 Months">2 - 3 Months</option>
+                <option value="6 Months">6 Months</option>
+              </select>
+            </div>
+
+            {/* Filter 5: Educational Qualification */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>🎓</span> Educational Qualification
+              </label>
+              <select
+                value={educationFilter}
+                onChange={(e) => setEducationFilter(e.target.value)}
+                className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
+              >
+                <option value="All">All Qualifications</option>
+                <option value="B.Tech / B.E.">B.Tech / B.E. (Engineering)</option>
+                <option value="BCA / MCA">BCA / MCA / Computer Science</option>
+                <option value="Diploma">Diploma / Polytechnic</option>
+              </select>
+            </div>
+
+            {/* Filter 6: Sector / Industry */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>🔲</span> Sector / Industry
+              </label>
+              <select
+                value={sectorFilter}
+                onChange={(e) => setSectorFilter(e.target.value)}
+                className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
+              >
+                <option value="All">All Sectors</option>
+                <option value="IT & Software">IT & Software Engineering</option>
+                <option value="AI & Data Science">AI, Data Science & ML</option>
+                <option value="E-Commerce & Mobile">E-Commerce & Apps</option>
+                <option value="Finance & Fintech">Finance & Analytics</option>
+              </select>
+            </div>
+
+            {/* Filter 7: AI Match Threshold */}
+            <div className="space-y-1 sm:col-span-2 lg:col-span-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>🎯</span> AI Skill Match Score
+              </label>
+              <select
+                value={minScore}
+                onChange={(e) => setMinScore(e.target.value)}
+                className="input text-xs text-slate-900 dark:text-white bg-white dark:bg-[#0C0A1D]"
+              >
+                <option value="0">All Match Scores</option>
+                <option value="60">60%+ Match</option>
+                <option value="75">75%+ Match</option>
+                <option value="85">85%+ Match</option>
+              </select>
+            </div>
+
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between">
         <p className="text-xs font-mono uppercase tracking-widest text-indigo-700 dark:text-indigo-300 font-bold">
           Showing {filteredItems.length} of {items.length} recommendations
         </p>
+
+        {activeCount > 0 && (
+          <button
+            onClick={resetFilters}
+            className="text-xs text-orange-600 dark:text-amber-400 font-bold hover:underline"
+          >
+            Clear {activeCount} filters
+          </button>
+        )}
       </div>
 
       {filteredItems.length === 0 ? (
         <EmptyState text="No internships match your filter criteria." />
       ) : (
         filteredItems.map((i) => (
-          <div key={i.id} className="glass-card p-6 border-slate-200/90 dark:border-white/15 space-y-4">
-            <div className="flex items-start gap-4">
-              <MatchSeal score={i.match.overall} size={64} />
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white">{i.title}</h3>
-                  {i.company_verified ? <span className="chip">Verified employer</span> : <span className="chip-missing">Pending verification</span>}
-                </div>
-                <div className="text-xs text-slate-600 dark:text-slate-300 mt-1 font-medium">
-                  {i.company_name || 'TechNova Solutions'} · {i.location} · {i.type} {i.stipend && `· ${i.stipend}`}
-                </div>
-                <p className="text-xs text-slate-700 dark:text-slate-300 mt-2 leading-relaxed">{i.description}</p>
+          <div key={i.id} className="glass-card p-6 border-slate-200/90 dark:border-white/15 hover:border-indigo-500/40 transition-all rounded-3xl">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+              
+              {/* Left & Main Info Column */}
+              <div className="flex items-start sm:items-center gap-5 flex-1 min-w-0">
+                {/* Match Score Gauge */}
+                <MatchSeal score={i.match.overall} size={76} />
 
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {i.match.matchedSkills.map((s) => <span key={s} className="chip">{s}</span>)}
-                  {i.match.missingSkills.map((s) => <span key={s} className="chip-missing">missing: {s}</span>)}
-                </div>
-
-                <button
-                  onClick={() => setExpanded(expanded === i.id ? null : i.id)}
-                  className="text-xs text-indigo-600 dark:text-indigo-300 hover:underline mt-3 font-bold block"
-                >
-                  {expanded === i.id ? 'Hide match breakdown' : 'Why this recommendation?'}
-                </button>
-
-                {expanded === i.id && (
-                  <div className="form-rule mt-3 pt-3 grid sm:grid-cols-2 gap-4">
-                    <div className="grid grid-cols-2 gap-y-1.5 text-xs font-mono text-slate-700 dark:text-slate-300">
-                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Skill</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.skill}%</span>
-                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Location</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.location}%</span>
-                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Type</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.type}%</span>
-                      <span className="text-slate-500 dark:text-slate-400 font-semibold">CGPA</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.cgpa}%</span>
-                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Projects</span><span className="text-right font-bold text-indigo-600 dark:text-indigo-300">{i.match.breakdown.projects}%</span>
-                    </div>
-                    <ul className="text-xs text-slate-700 dark:text-slate-300 space-y-1 font-medium">
-                      {i.match.reasons.map((r, idx) => <li key={idx}>✔ {r}</li>)}
-                    </ul>
-                  </div>
-                )}
-
-                <div className="mt-4">
-                  {i.already_applied ? (
-                    <span className="text-xs text-emerald-700 dark:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl w-fit">
-                      ✔ Already Applied
+                <div className="space-y-1.5 min-w-0">
+                  {/* Top Match Badge */}
+                  {i.match.overall >= 50 && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[10px] font-bold">
+                      ⭐ Top Match
                     </span>
-                  ) : (
-                    <button
-                      className="btn-primary !px-5 !py-2 text-xs"
-                      onClick={() => {
-                        setSelectedInternship(i);
-                        setCoverNote('');
-                      }}
-                    >
-                      Apply now
-                    </button>
                   )}
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-display text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                      {i.title}
+                    </h3>
+                    {i.company_verified ? (
+                      <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30 text-[10px] font-bold flex items-center gap-1">
+                        ✔ Verified
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-md bg-slate-500/15 text-slate-700 dark:text-slate-400 text-[10px] font-bold">
+                        Company
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    {i.company_name || 'TechNova Solutions'}
+                  </p>
+
+                  {/* Metadata line */}
+                  <div className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2 flex-wrap">
+                    <span>📍 {i.location}</span>
+                    <span>•</span>
+                    <span>₹ {i.stipend || '₹10,000/month'}</span>
+                    <span>•</span>
+                    <span>⏱️ {i.type}</span>
+                  </div>
+
+                  {/* Required Skills Chips */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {i.required_skills.slice(0, 4).map((s) => (
+                      <span key={s} className="px-2.5 py-1 rounded-xl bg-slate-200/80 dark:bg-white/[0.07] border border-slate-300/80 dark:border-white/10 text-slate-800 dark:text-slate-200 text-xs font-semibold">
+                        {s}
+                      </span>
+                    ))}
+                    {i.required_skills.length > 4 && (
+                      <span className="px-2 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 text-xs font-semibold">
+                        +{i.required_skills.length - 4} more
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Middle Right Column: Why this match & Missing Skills */}
+              <div className="lg:w-72 space-y-2 border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-white/10 pt-3 lg:pt-0 lg:pl-6">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">Why this match?</span>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium mt-0.5">
+                    {i.match.reasons[0] || 'Strong match based on your technical skills & experience.'}
+                  </p>
+                </div>
+
+                {i.match.missingSkills.length > 0 && (
+                  <div>
+                    <span className="text-[10px] uppercase font-mono font-bold text-amber-700 dark:text-amber-400 block">Missing Skills:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {i.match.missingSkills.slice(0, 3).map((s) => (
+                        <span key={s} className="px-2 py-0.5 rounded-lg bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Apply & Save Buttons */}
+              <div className="flex flex-row lg:flex-col items-center gap-2 w-full lg:w-36 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-200 dark:border-white/10">
+                {i.already_applied ? (
+                  <span className="w-full text-center py-2.5 px-4 rounded-xl bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold">
+                    ✔ Applied
+                  </span>
+                ) : (
+                  <button
+                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all active:scale-95"
+                    onClick={() => {
+                      setSelectedInternship(i);
+                      setCoverNote('');
+                    }}
+                  >
+                    Apply Now
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="w-full py-2 px-3 rounded-xl border border-slate-300 dark:border-white/15 bg-white/60 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/15 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>🔖</span>
+                  <span>Save</span>
+                </button>
+              </div>
+
             </div>
           </div>
         ))
@@ -362,6 +636,7 @@ function ProfileEditor({ profile, onSaved }) {
   const [parsing, setParsing] = useState(false);
   const [parsedInfo, setParsedInfo] = useState(null);
   const [suggestions, setSuggestions] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const isDirty =
     form.name !== (profile.name || '') ||
@@ -405,6 +680,7 @@ function ProfileEditor({ profile, onSaved }) {
       fd.append('resume', resumeFile);
       const { data } = await api.post('/student/resume', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setParsedInfo(data.extracted);
+      setShowReportModal(true);
       onSaved(data.profile);
       setForm((f) => ({ ...f, skills: data.profile.skills.join(', ') }));
     } catch (err) {
@@ -497,19 +773,32 @@ function ProfileEditor({ profile, onSaved }) {
             </div>
           </div>
           <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-            Upload a PDF resume — we'll extract your skills automatically.
+            Upload a PDF resume — we'll extract your skills & launch full AI Analysis automatically.
           </p>
           <form onSubmit={uploadResume} className="space-y-3">
             <input type="file" accept="application/pdf" onChange={(e) => setResumeFile(e.target.files[0])} className="text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/15 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-500/25 cursor-pointer" />
             <button className="btn-primary w-full text-xs !py-2.5" disabled={!resumeFile || parsing}>
-              {parsing ? 'Parsing…' : 'Upload & Parse'}
+              {parsing ? 'Parsing Resume…' : 'Upload & Launch AI Analysis'}
             </button>
           </form>
-          {parsedInfo && (
-            <div className="form-rule mt-3 pt-3 text-xs space-y-1 text-slate-700 dark:text-slate-300">
-              {parsedInfo.name && <div><span className="text-slate-500">Name:</span> {parsedInfo.name}</div>}
-              {parsedInfo.email && <div><span className="text-slate-500">Email:</span> {parsedInfo.email}</div>}
-              <div className="flex flex-wrap gap-1 mt-1">{parsedInfo.skills.map((s) => <span key={s} className="chip">{s}</span>)}</div>
+
+          {(parsedInfo || profile?.resume_filename) && (
+            <div className="form-rule mt-3 pt-3 space-y-3">
+              <button
+                type="button"
+                onClick={() => setShowReportModal(true)}
+                className="btn-saffron w-full text-xs !py-2.5 flex items-center justify-center gap-2 font-bold shadow-lg"
+              >
+                <span>✨ View AI Resume Analysis</span>
+                <span>→</span>
+              </button>
+              {parsedInfo && (
+                <div className="text-xs space-y-1 text-slate-700 dark:text-slate-300">
+                  {parsedInfo.name && <div><span className="text-slate-500">Name:</span> {parsedInfo.name}</div>}
+                  {parsedInfo.email && <div><span className="text-slate-500">Email:</span> {parsedInfo.email}</div>}
+                  <div className="flex flex-wrap gap-1 mt-1">{parsedInfo.skills.map((s) => <span key={s} className="chip">{s}</span>)}</div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -537,6 +826,31 @@ function ProfileEditor({ profile, onSaved }) {
           )}
         </div>
       </div>
+
+      <ResumeReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportData={parsedInfo || {
+          filename: profile?.resume_filename || 'Parsed_Resume.pdf',
+          name: profile?.name,
+          skills: profile?.skills || [],
+          ai_analysis: {
+            ats_score: Math.min(96, 60 + (profile?.skills?.length || 0) * 3),
+            market_readiness: (profile?.skills?.length || 0) >= 5 ? 'Market Ready (Top 5%)' : 'Strong Candidate',
+            executive_summary: `Candidate displays active technical competencies in ${(profile?.skills || []).slice(0, 5).join(', ') || 'software engineering'}.`,
+            key_strengths: [
+              `Verified ${profile?.skills?.length || 0} skills on candidate profile.`,
+              'PDF formatting active in profile database.'
+            ],
+            actionable_recommendations: [
+              'Add quantitative impact metrics to project descriptions.',
+              'Ensure your GitHub portfolio link is present on resume header.'
+            ],
+            recommended_roles: ['Full Stack Developer', 'Software Engineering Intern']
+          }
+        }}
+        onApplySkills={(newSkills) => setForm((f) => ({ ...f, skills: [...new Set([...f.skills.split(',').map((s) => s.trim()).filter(Boolean), ...newSkills])].join(', ') }))}
+      />
     </div>
   );
 }

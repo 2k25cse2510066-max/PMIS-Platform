@@ -108,7 +108,16 @@ router.post('/resume', upload.single('resume'), async (req, res) => {
 
     res.json({
       message: 'Resume parsed successfully',
-      extracted: { name: parsed.name, email: parsed.email, phone: parsed.phone, skills: parsed.skills, certifications: parsed.certifications },
+      extracted: {
+        name: parsed.name,
+        email: parsed.email,
+        phone: parsed.phone,
+        skills: parsed.skills,
+        certifications: parsed.certifications,
+        education: parsed.education,
+        ai_analysis: parsed.ai_analysis,
+        filename,
+      },
       profile: await loadProfile(req.user.id),
     });
   } catch (e) {

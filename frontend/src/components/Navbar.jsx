@@ -100,8 +100,8 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
 
           {/* Search Bar Input */}
           <div className="flex-1 max-w-md hidden md:block">
-            <div className="relative">
-              <svg className="w-4 h-4 absolute left-3.5 top-3 text-slate-400 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="relative flex items-center">
+              <svg className="w-4 h-4 absolute left-3.5 text-slate-400 dark:text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input
@@ -109,8 +109,11 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
                 value={search || ''}
                 onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
                 placeholder="Search internships, skills, companies..."
-                className="input pl-9 text-xs !bg-white/80 dark:!bg-white/[0.06] !text-slate-900 dark:!text-white placeholder:!text-slate-400 dark:placeholder:!text-slate-400"
+                className="input pl-9 pr-9 text-xs !bg-white/80 dark:!bg-[#151733] dark:!border-[#26294D] !text-slate-900 dark:!text-white placeholder:!text-slate-400 dark:placeholder:!text-slate-400 !rounded-xl"
               />
+              <span className="absolute right-3 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-200/80 dark:bg-white/10 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-white/10 pointer-events-none">
+                /
+              </span>
             </div>
           </div>
 

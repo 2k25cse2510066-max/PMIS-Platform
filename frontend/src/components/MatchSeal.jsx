@@ -1,47 +1,57 @@
-export default function MatchSeal({ score, size = 60 }) {
-  const strokeWidth = 5;
+export default function MatchSeal({ score, size = 76 }) {
+  const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
-  let ringColor = '#10B981'; // Green
-  let bgGlow = 'rgba(16, 185, 129, 0.15)';
-  let label = 'Strong';
+  let strokeGradientId = "gaugeGradGreen";
 
-  if (score >= 80) {
-    ringColor = '#10B981'; // Emerald Green
-    bgGlow = 'rgba(16, 185, 129, 0.15)';
-    label = 'Strong';
-  } else if (score >= 60) {
-    ringColor = '#3B82F6'; // Bright Blue
-    bgGlow = 'rgba(59, 130, 246, 0.15)';
-    label = 'Good';
+  if (score >= 75) {
+    strokeGradientId = "gaugeGradPurple";
+  } else if (score >= 50) {
+    strokeGradientId = "gaugeGradBlue";
   } else {
-    ringColor = '#F59E0B'; // Saffron/Amber
-    bgGlow = 'rgba(245, 158, 11, 0.15)';
-    label = 'Stretch';
+    strokeGradientId = "gaugeGradGreen";
   }
 
   return (
     <div
       className="relative flex items-center justify-center shrink-0 rounded-full shadow-sm transition-transform hover:scale-105"
-      style={{ width: size, height: size, backgroundColor: bgGlow }}
-      title={`${score}% overall match (${label})`}
+      style={{ width: size, height: size }}
+      title={`${score}% overall ATS & Skill match`}
     >
       <svg width={size} height={size} className="transform -rotate-90">
+        <defs>
+          <linearGradient id="gaugeGradPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#A855F7" />
+            <stop offset="100%" stopColor="#6366F1" />
+          </linearGradient>
+          <linearGradient id="gaugeGradBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38BDF8" />
+            <stop offset="100%" stopColor="#3B82F6" />
+          </linearGradient>
+          <linearGradient id="gaugeGradGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#34D399" />
+            <stop offset="100%" stopColor="#059669" />
+          </linearGradient>
+        </defs>
+
+        {/* Track */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="rgba(148, 163, 184, 0.25)"
           strokeWidth={strokeWidth}
           fill="transparent"
+          className="stroke-slate-200 dark:stroke-white/10"
         />
+
+        {/* Dynamic Progress Circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={ringColor}
+          stroke={`url(#${strokeGradientId})`}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
@@ -51,7 +61,7 @@ export default function MatchSeal({ score, size = 60 }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-        <span className="font-mono font-bold text-navy-800 dark:text-white" style={{ fontSize: Math.max(size * 0.26, 10) }}>
+        <span className="font-mono font-extrabold text-slate-900 dark:text-white text-base tracking-tight">
           {score}%
         </span>
       </div>
