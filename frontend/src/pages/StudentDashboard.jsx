@@ -10,6 +10,94 @@ import api from '../api/client';
 
 const TABS = ['Recommendations', 'Profile', 'Gap Analysis', 'Applications', 'Assistant'];
 
+export function checkProfileCompletion(profile) {
+  if (!profile) {
+    return {
+      complete: false,
+      missingFields: ['Full Name', 'Phone Number', 'Preferred Location', 'CGPA', 'Skills', 'Resume Upload'],
+    };
+  }
+
+  const missingFields = [];
+  if (!profile.name || !profile.name.trim()) missingFields.push('Full Name');
+  if (!profile.phone || !profile.phone.trim()) missingFields.push('Phone Number');
+  if (!profile.location || !profile.location.trim()) missingFields.push('Preferred Location');
+  if (profile.cgpa === null || profile.cgpa === undefined || profile.cgpa === '' || Number(profile.cgpa) <= 0) missingFields.push('CGPA');
+  if (!profile.skills || profile.skills.length === 0) missingFields.push('Skills');
+  if (!profile.resume_filename) missingFields.push('Resume Upload');
+
+  return {
+    complete: missingFields.length === 0,
+    missingFields,
+  };
+}
+
+function IncompleteProfileModal({ isOpen, onClose, missingFields = [], onGoToProfile }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+      <div
+        className="glass-panel max-w-md w-full p-6 space-y-5 border-amber-500/40 bg-white/95 dark:bg-[#0F0D25]/95 shadow-2xl rounded-3xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center justify-center text-2xl shrink-0">
+            ⚠️
+          </div>
+          <div>
+            <span className="text-[10px] font-mono uppercase tracking-wider font-bold text-amber-600 dark:text-amber-400">
+              Application Locked
+            </span>
+            <h3 className="font-display text-xl font-black text-slate-900 dark:text-white">
+              Profile Incomplete
+            </h3>
+          </div>
+        </div>
+
+        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          Without completing your profile, you cannot apply for any internship. Employers require complete profile details for allocation matching.
+        </p>
+
+        <div className="p-4 rounded-2xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 space-y-2.5">
+          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+            Missing Profile Requirements ({missingFields.length}):
+          </span>
+          <div className="grid grid-cols-1 gap-2 text-xs">
+            {missingFields.map((field) => (
+              <div key={field} className="flex items-center gap-2 text-rose-700 dark:text-rose-300 font-semibold bg-rose-500/10 px-3 py-1.5 rounded-xl border border-rose-500/20">
+                <span>❌</span>
+                <span>{field}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2.5">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-white/15 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              if (onGoToProfile) onGoToProfile();
+            }}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 text-white font-extrabold text-xs shadow-lg hover:shadow-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+          >
+            <span>Complete Profile Now</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function StudentDashboard() {
   const { user } = useAuth();
   const location = useLocation();
@@ -136,8 +224,8 @@ export default function StudentDashboard() {
                 <span>{profile?.name && profile?.phone && profile?.location ? '✓' : '⚠'}</span>
                 <span>Basic Information</span>
               </span>
-              <span className={`flex items-center gap-1 font-semibold ${(profile?.skills || []).length >= 3 ? 'text-emerald-300' : 'text-amber-300'}`}>
-                <span>{(profile?.skills || []).length >= 3 ? '✓' : '⚠'}</span>
+              <span className={`flex items-center gap-1 font-semibold ${(profile?.skills || []).length >= 1 ? 'text-emerald-300' : 'text-amber-300'}`}>
+                <span>{(profile?.skills || []).length >= 1 ? '✓' : '⚠'}</span>
                 <span>Skills</span>
               </span>
               <span className={`flex items-center gap-1 font-semibold ${profile?.resume_filename ? 'text-emerald-300' : 'text-amber-300'}`}>
@@ -153,6 +241,18 @@ export default function StudentDashboard() {
                 <span>CGPA</span>
               </span>
             </div>
+
+            {!checkProfileCompletion(profile).complete && (
+              <div className="px-3.5 py-2.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-200 text-xs font-semibold flex items-center justify-between flex-wrap gap-2 mt-2">
+                <div className="flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span><strong>Applications Locked:</strong> You must complete all required profile details to apply for internships.</span>
+                </div>
+                <button onClick={() => setTab('Profile')} className="font-bold underline text-amber-100 hover:text-white">
+                  Complete Details →
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Segmented Glass Tab Navigation */}
@@ -173,7 +273,7 @@ export default function StudentDashboard() {
           </div>
 
           {/* Active Tab View */}
-          {tab === 'Recommendations' && <Recommendations profile={profile} onApplied={loadProfile} search={search} />}
+          {tab === 'Recommendations' && <Recommendations profile={profile} onApplied={loadProfile} search={search} onGoToProfile={() => setTab('Profile')} />}
           {tab === 'Profile' && profile && <ProfileEditor profile={profile} onSaved={setProfile} />}
           {tab === 'Gap Analysis' && <GapAnalysis />}
           {tab === 'Applications' && <Applications />}
@@ -185,13 +285,17 @@ export default function StudentDashboard() {
 }
 
 // ---------------------------------------------------------------------------
-function Recommendations({ profile, onApplied, search }) {
+function Recommendations({ profile, onApplied, search, onGoToProfile }) {
   const [items, setItems] = useState(null);
   const [applying, setApplying] = useState(null);
   const [selectedInternship, setSelectedInternship] = useState(null);
   const [coverNote, setCoverNote] = useState('');
   const [expanded, setExpanded] = useState(null);
   const [localSearch, setLocalSearch] = useState('');
+
+  // Incomplete profile modal state
+  const [showIncompleteModal, setShowIncompleteModal] = useState(false);
+  const [incompleteFields, setIncompleteFields] = useState([]);
 
   // PMIS Filter States
   const [providerFilter, setProviderFilter] = useState('All');
@@ -205,6 +309,17 @@ function Recommendations({ profile, onApplied, search }) {
   // Comparison State
   const [selectedForCompare, setSelectedForCompare] = useState([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
+
+  function handleApplyClick(internship) {
+    const status = checkProfileCompletion(profile);
+    if (!status.complete) {
+      setIncompleteFields(status.missingFields);
+      setShowIncompleteModal(true);
+      return;
+    }
+    setSelectedInternship(internship);
+    setCoverNote('');
+  }
 
   function toggleCompare(item) {
     if (selectedForCompare.some((c) => c.id === item.id)) {
@@ -225,6 +340,13 @@ function Recommendations({ profile, onApplied, search }) {
 
   async function submitApplication() {
     if (!selectedInternship) return;
+    const status = checkProfileCompletion(profile);
+    if (!status.complete) {
+      setIncompleteFields(status.missingFields);
+      setShowIncompleteModal(true);
+      setSelectedInternship(null);
+      return;
+    }
     setApplying(selectedInternship.id);
     try {
       await api.post(`/student/apply/${selectedInternship.id}`);
@@ -233,7 +355,13 @@ function Recommendations({ profile, onApplied, search }) {
       load();
       if (onApplied) onApplied();
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to submit application');
+      const errorMsg = err.response?.data?.error || 'Failed to submit application';
+      alert(errorMsg);
+      if (err.response?.data?.missingFields) {
+        setIncompleteFields(err.response.data.missingFields);
+        setShowIncompleteModal(true);
+        setSelectedInternship(null);
+      }
     } finally {
       setApplying(null);
     }
@@ -631,13 +759,11 @@ function Recommendations({ profile, onApplied, search }) {
                   </span>
                 ) : (
                   <button
-                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all active:scale-95"
-                    onClick={() => {
-                      setSelectedInternship(i);
-                      setCoverNote('');
-                    }}
+                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/25 transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                    onClick={() => handleApplyClick(i)}
                   >
-                    Apply Now
+                    {!checkProfileCompletion(profile).complete && <span className="text-amber-300">🔒</span>}
+                    <span>Apply Now</span>
                   </button>
                 )}
 
@@ -682,9 +808,17 @@ function Recommendations({ profile, onApplied, search }) {
         onClose={() => setShowCompareModal(false)}
         internships={selectedForCompare}
         onApply={(item) => {
-          setSelectedInternship(item);
+          handleApplyClick(item);
           setShowCompareModal(false);
         }}
+      />
+
+      {/* Incomplete Profile Modal */}
+      <IncompleteProfileModal
+        isOpen={showIncompleteModal}
+        onClose={() => setShowIncompleteModal(false)}
+        missingFields={incompleteFields}
+        onGoToProfile={onGoToProfile}
       />
 
       {/* APPLICATION DETAILS FORM MODAL */}

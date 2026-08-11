@@ -207,6 +207,22 @@ router.get('/resume-suggestions', async (req, res) => {
   }
 });
 
+function checkProfileCompletion(profile) {
+  if (!profile) return { complete: false, missingFields: ['Full Name', 'Phone Number', 'Location', 'CGPA', 'Skills', 'Resume Upload'] };
+  const missingFields = [];
+  if (!profile.name || !profile.name.trim()) missingFields.push('Full Name');
+  if (!profile.phone || !profile.phone.trim()) missingFields.push('Phone Number');
+  if (!profile.location || !profile.location.trim()) missingFields.push('Preferred Location');
+  if (profile.cgpa === null || profile.cgpa === undefined || profile.cgpa === '' || Number(profile.cgpa) <= 0) missingFields.push('CGPA');
+  if (!profile.skills || profile.skills.length === 0) missingFields.push('Skills');
+  if (!profile.resume_filename) missingFields.push('Resume Upload');
+
+  return {
+    complete: missingFields.length === 0,
+    missingFields,
+  };
+}
+
 // Applications
 router.post('/apply/:internshipId', async (req, res) => {
   try {
@@ -218,6 +234,14 @@ router.post('/apply/:internshipId', async (req, res) => {
     if (!internship) return res.status(404).json({ error: 'Internship not found' });
 
     const profile = await loadProfile(req.user.id);
+    const profileStatus = checkProfileCompletion(profile);
+    if (!profileStatus.complete) {
+      return res.status(400).json({
+        error: `Incomplete Profile: Please complete your profile (${profileStatus.missingFields.join(', ')}) before applying for internships.`,
+        missingFields: profileStatus.missingFields,
+      });
+    }
+
     const match = computeMatch(profile, { ...internship, required_skills: internship.required_skills || [] });
 
     const id = nanoid();
