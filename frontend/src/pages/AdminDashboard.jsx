@@ -51,8 +51,8 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <h1 className="font-display text-2xl md:text-3xl font-extrabold text-white tracking-tight">MCA Admin Control Room</h1>
-                  <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-sm">System Overseer</span>
+                  <h1 className="font-display text-2xl md:text-3xl font-extrabold text-white tracking-tight">Internship Operations Control Room[Developer]</h1>
+                  <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-sm">System Administrator</span>
                 </div>
                 <p className="text-slate-200 text-xs mt-1 font-medium">Verify company & student entities, audit allocation seat utilization, and export system analytics.</p>
               </div>
@@ -66,11 +66,10 @@ export default function AdminDashboard() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-5 py-2.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 ${
-                tab === t
+              className={`px-5 py-2.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 ${tab === t
                   ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
                   : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10'
-              }`}
+                }`}
             >
               {t === 'Overview' ? '📊 System Analytics' : t === 'Companies' ? '🏢 Company Verification' : '🎓 Student Verification'}
             </button>
