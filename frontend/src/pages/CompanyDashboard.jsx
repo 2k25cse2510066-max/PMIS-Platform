@@ -362,8 +362,11 @@ function Applicants({ internshipId, search }) {
                   )}
                 </div>
 
-                <div className="text-xs text-slate-600 dark:text-slate-300 font-medium">
-                  {a.location || 'Location not set'} {a.cgpa ? `· CGPA ${a.cgpa}` : ''} {a.phone ? `· ${a.phone}` : ''}
+                <div className="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2 flex-wrap">
+                  <span>📍 {a.location || 'Location not set'}</span>
+                  {a.cgpa ? <span>• CGPA {a.cgpa}</span> : null}
+                  {a.phone ? <span>• 📞 {a.phone}</span> : null}
+                  {a.email ? <span>• ✉️ {a.email}</span> : null}
                 </div>
 
                 <div className="flex flex-wrap gap-1 pt-0.5">
@@ -376,6 +379,19 @@ function Applicants({ internshipId, search }) {
 
             {/* Actions & Status Dropdown */}
             <div className="flex items-center gap-2 flex-wrap self-end sm:self-center">
+              {a.resume_url && (
+                <a
+                  href={a.resume_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-extrabold text-xs shadow hover:shadow-indigo-500/25 active:scale-95 transition-all flex items-center gap-1.5"
+                  title="View Candidate PDF Resume / CV"
+                >
+                  <span>📄</span>
+                  <span>View CV</span>
+                </a>
+              )}
+
               {a.status === 'applied' && (
                 <button
                   onClick={() => updateStatus(a.application_id, 'shortlisted')}
@@ -432,9 +448,13 @@ function Applicants({ internshipId, search }) {
           <div className="glass-panel max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto space-y-4 border-slate-200/90 dark:border-white/20 rounded-3xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[10px] uppercase font-mono font-bold text-amber-500">Candidate Match Breakdown</span>
+                <span className="text-[10px] uppercase font-mono font-bold text-amber-500">Candidate Profile & CV Details</span>
                 <h3 className="font-display text-2xl font-bold text-slate-900 dark:text-white mt-0.5">{selectedApplicant.name}</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-300">{selectedApplicant.location || 'Location not specified'} · Phone: {selectedApplicant.phone || 'N/A'}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-300 flex items-center gap-3 flex-wrap mt-0.5">
+                  <span>📍 {selectedApplicant.location || 'Location not specified'}</span>
+                  {selectedApplicant.phone && <span>• 📞 {selectedApplicant.phone}</span>}
+                  {selectedApplicant.email && <span>• ✉️ {selectedApplicant.email}</span>}
+                </p>
               </div>
               <button onClick={() => setSelectedApplicant(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">×</button>
             </div>
@@ -452,23 +472,48 @@ function Applicants({ internshipId, search }) {
             </div>
 
             {selectedApplicant.resume_filename ? (
-              <div className="flex items-center justify-between bg-emerald-500/15 border border-emerald-500/30 p-3.5 rounded-2xl">
-                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">📄 PDF Resume Uploaded ({selectedApplicant.resume_filename})</span>
-                {selectedApplicant.resume_url ? (
-                  <a
-                    href={selectedApplicant.resume_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn-primary text-xs !py-1.5 !px-3"
-                  >
-                    View / Download PDF
-                  </a>
-                ) : (
-                  <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">Resume link active</span>
+              <div className="space-y-3 bg-emerald-500/15 border border-emerald-500/30 p-4 rounded-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-extrabold text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
+                      <span>📄</span>
+                      <span>Candidate CV / Resume: {selectedApplicant.resume_filename}</span>
+                    </div>
+                    <div className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
+                      Uploaded by candidate — verified for AI skill parsing & matching.
+                    </div>
+                  </div>
+                  {selectedApplicant.resume_url ? (
+                    <a
+                      href={selectedApplicant.resume_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-primary text-xs !py-2 !px-4 shrink-0 shadow-md flex items-center gap-1.5"
+                    >
+                      <span>📄 View / Download PDF Resume</span>
+                      <span>↗</span>
+                    </a>
+                  ) : (
+                    <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">PDF Active</span>
+                  )}
+                </div>
+
+                {selectedApplicant.resume_text && (
+                  <div className="pt-2 border-t border-emerald-500/20">
+                    <span className="text-[10px] uppercase font-mono font-bold text-emerald-800 dark:text-emerald-300 block mb-1">
+                      Extracted Resume Content Summary:
+                    </span>
+                    <div className="p-3 bg-white/80 dark:bg-black/40 rounded-xl text-xs text-slate-800 dark:text-slate-200 max-h-36 overflow-y-auto leading-relaxed font-sans border border-emerald-500/20 whitespace-pre-wrap">
+                      {selectedApplicant.resume_text}
+                    </div>
+                  </div>
                 )}
               </div>
             ) : (
-              <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] p-3 rounded-2xl border border-slate-200 dark:border-white/10">No PDF resume uploaded by candidate yet.</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/[0.05] p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center gap-2">
+                <span>⚠️</span>
+                <span>No PDF resume uploaded by candidate yet.</span>
+              </div>
             )}
 
             <div>

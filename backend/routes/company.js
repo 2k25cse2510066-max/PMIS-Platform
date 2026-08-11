@@ -115,6 +115,10 @@ router.get('/internships/:id/applicants', async (req, res) => {
     const { data: students } = studentIds.length
       ? await supabase.from('student_profiles').select('*').in('user_id', studentIds)
       : { data: [] };
+    const { data: userRows } = studentIds.length
+      ? await supabase.from('users').select('id, email').in('id', studentIds)
+      : { data: [] };
+    const userEmailMap = new Map((userRows || []).map((u) => [u.id, u.email]));
     const studentsById = new Map((students || []).map((s) => [s.user_id, s]));
 
     const resumeFiles = (students || []).map((s) => s.resume_filename).filter(Boolean);
@@ -126,6 +130,7 @@ router.get('/internships/:id/applicants', async (req, res) => {
 
     const ranked = (apps || []).map((a) => {
       const s = studentsById.get(a.student_id) || {};
+      const studentEmail = userEmailMap.get(a.student_id) || '';
       const student = {
         skills: s.skills || [],
         projects: s.projects || [],
@@ -139,6 +144,7 @@ router.get('/internships/:id/applicants', async (req, res) => {
         application_id: a.id,
         student_id: a.student_id,
         name: s.name,
+        email: studentEmail,
         phone: s.phone,
         location: s.location,
         cgpa: s.cgpa,
@@ -146,6 +152,7 @@ router.get('/internships/:id/applicants', async (req, res) => {
         projects: student.projects,
         certificates: student.certificates,
         resume_filename: s.resume_filename,
+        resume_text: s.resume_text || '',
         resume_url: s.resume_filename ? resumeUrls.get(s.resume_filename) || null : null,
         status: a.status,
         applied_at: a.applied_at,
