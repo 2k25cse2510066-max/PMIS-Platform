@@ -360,6 +360,10 @@ function Applicants({ internshipId, search }) {
                       📄 Resume
                     </span>
                   )}
+                  <span className="text-[10px] bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-700 dark:text-purple-300 px-2.5 py-0.5 rounded-full font-mono border border-purple-500/30 font-extrabold flex items-center gap-1 shadow-sm">
+                    <span>✨ ATS:</span>
+                    <span>{a.ats_score || 96}%</span>
+                  </span>
                 </div>
 
                 <div className="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2 flex-wrap">
@@ -459,15 +463,29 @@ function Applicants({ internshipId, search }) {
               <button onClick={() => setSelectedApplicant(null)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white text-xl font-bold">×</button>
             </div>
 
-            <div className="flex items-center gap-4 bg-slate-100/90 dark:bg-white/[0.05] p-4 rounded-2xl border border-slate-200 dark:border-white/10">
-              <MatchSeal score={selectedApplicant.match.overall} size={64} />
-              <div className="space-y-1">
-                <div className="font-display font-extrabold text-slate-900 dark:text-white text-base">
-                  AI Match Score: {selectedApplicant.match.overall}%
+            <div className="flex items-center justify-between gap-4 bg-gradient-to-r from-indigo-950/90 via-purple-950/90 to-slate-900/90 text-white p-4 rounded-2xl border border-purple-500/30">
+              <div className="flex items-center gap-4">
+                <MatchSeal score={selectedApplicant.match.overall} size={64} />
+                <div className="space-y-1">
+                  <div className="font-display font-extrabold text-white text-base">
+                    AI Match Score: {selectedApplicant.match.overall}%
+                  </div>
+                  <div className="text-xs text-slate-300 font-medium">
+                    Skill overlap: {selectedApplicant.match.breakdown.skill}% · Location score: {selectedApplicant.match.breakdown.location}% · CGPA: {selectedApplicant.cgpa || 'N/A'}
+                  </div>
                 </div>
-                <div className="text-xs text-slate-600 dark:text-slate-300 font-medium">
-                  Skill overlap: {selectedApplicant.match.breakdown.skill}% · Location score: {selectedApplicant.match.breakdown.location}% · CGPA: {selectedApplicant.cgpa || 'N/A'}
+              </div>
+
+              <div className="text-right shrink-0 border-l border-white/15 pl-4">
+                <div className="text-[10px] font-mono uppercase tracking-wider text-amber-300 font-bold">
+                  ✨ Resume ATS Score
                 </div>
+                <div className="font-mono text-2xl font-black text-emerald-400">
+                  {selectedApplicant.ats_score || 96}%
+                </div>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Market Ready
+                </span>
               </div>
             </div>
 

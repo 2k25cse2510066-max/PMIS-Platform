@@ -95,6 +95,20 @@ router.get('/internships', async (req, res) => {
   }
 });
 
+function computeAtsScore(s) {
+  const skillsCount = (s.skills || []).length;
+  const projectsCount = (s.projects || []).length;
+  const text = (s.resume_text || '').toLowerCase();
+  let score = 55;
+  score += Math.min(30, skillsCount * 3);
+  if (projectsCount >= 1) score += 5;
+  if (projectsCount >= 2) score += 5;
+  if (s.phone) score += 2;
+  if (s.cgpa && Number(s.cgpa) >= 7.5) score += 3;
+  if (/github|linkedin/i.test(text)) score += 3;
+  return Math.min(98, Math.max(50, score));
+}
+
 // AI ranking of applicants for a given internship
 router.get('/internships/:id/applicants', async (req, res) => {
   try {
@@ -154,6 +168,7 @@ router.get('/internships/:id/applicants', async (req, res) => {
         resume_filename: s.resume_filename,
         resume_text: s.resume_text || '',
         resume_url: s.resume_filename ? resumeUrls.get(s.resume_filename) || null : null,
+        ats_score: computeAtsScore(s),
         status: a.status,
         applied_at: a.applied_at,
         match,
