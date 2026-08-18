@@ -84,9 +84,11 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
             )}
 
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-orange-500 via-amber-500 to-orange-600 text-white flex items-center justify-center font-display text-sm font-black shadow-md shadow-orange-500/30">
-                PM
-              </div>
+              <img
+                src="/logo.png"
+                alt="PMIS Logo"
+                className="w-10 h-10 object-contain drop-shadow-sm rounded-lg transition-transform hover:scale-105"
+              />
               <div className="leading-tight hidden sm:block">
                 <div className="font-display font-extrabold text-slate-900 dark:text-white text-[15px] tracking-tight">
                   PM Internship Scheme

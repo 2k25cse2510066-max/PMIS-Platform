@@ -40,7 +40,8 @@ export default function Login() {
       <div className="max-w-md mx-auto px-5 pt-16 pb-16 flex flex-col justify-center">
         {/* Centered Glass Card */}
         <div className="glass-panel p-8 space-y-6 border-slate-200/90 dark:border-white/20">
-          <div>
+          <div className="flex flex-col items-center text-center">
+            <img src="/logo.png" alt="PMIS" className="w-16 h-16 object-contain mb-3 drop-shadow-md" />
             <h1 className="font-display text-3xl font-extrabold text-slate-900 dark:text-white mb-1">Sign in</h1>
             <p className="text-slate-600 dark:text-slate-300 text-xs font-medium">Access your allocation dashboard.</p>
           </div>
