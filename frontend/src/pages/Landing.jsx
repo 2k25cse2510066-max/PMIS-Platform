@@ -17,8 +17,9 @@ export default function Landing() {
       <section className="relative overflow-hidden border-b border-slate-200 dark:border-white/10">
         <div className="max-w-7xl mx-auto px-5 pt-16 pb-20 grid md:grid-cols-[1.2fr,1fr] gap-12 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md rounded-full px-3.5 py-1 mb-6 font-bold">
-              Ministry of Corporate Affairs · Smart Automation
+            <div className="inline-flex items-center gap-2.5 text-xs font-mono uppercase tracking-widest text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md rounded-full pl-2 pr-4 py-1.5 mb-6 font-bold shadow-sm">
+              <img src="/favicon.png" alt="PMIS Emblem" className="w-5 h-5 object-contain rounded-full" />
+              <span>Ministry of Corporate Affairs · Smart Automation</span>
             </div>
             <h1 className="font-display text-[2.75rem] leading-[1.05] sm:text-6xl sm:leading-[1.03] text-slate-900 dark:text-white font-extrabold tracking-tight">
               Every internship seat, matched to the student who actually fits it.

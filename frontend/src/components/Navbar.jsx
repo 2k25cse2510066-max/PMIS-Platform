@@ -68,7 +68,7 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
   return (
     <>
       <header className="glass-nav">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-3">
           {/* Brand & Mobile Sidebar Toggle */}
           <div className="flex items-center gap-3 shrink-0">
             {onToggleSidebar && (
@@ -83,17 +83,17 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
               </button>
             )}
 
-            <Link to="/" className="flex items-center gap-2.5">
+            <Link to="/" className="flex items-center gap-3">
               <img
                 src="/logo.png"
                 alt="PMIS Logo"
-                className="w-10 h-10 object-contain drop-shadow-sm rounded-lg transition-transform hover:scale-105"
+                className="w-14 h-14 sm:w-16 sm:h-16 object-contain drop-shadow-md rounded-xl transition-all duration-200 hover:scale-105"
               />
               <div className="leading-tight hidden sm:block">
-                <div className="font-display font-extrabold text-slate-900 dark:text-white text-[15px] tracking-tight">
+                <div className="font-display font-extrabold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight">
                   PM Internship Scheme
                 </div>
-                <div className="text-[9px] tracking-widest uppercase font-mono text-orange-600 dark:text-orange-400 font-bold">
+                <div className="text-[10px] tracking-widest uppercase font-mono text-orange-600 dark:text-orange-400 font-bold">
                   Smart Allocation Portal
                 </div>
               </div>

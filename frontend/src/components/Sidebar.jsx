@@ -51,7 +51,7 @@ export default function Sidebar({ activeTab, onSelectTab, isOpen, onClose }) {
 
       {/* Sidebar Panel */}
       <aside
-        className={`fixed lg:sticky top-20 left-4 z-40 w-64 h-[calc(100vh-6rem)] transition-all duration-300 transform ${
+        className={`fixed lg:sticky top-24 left-4 z-40 w-64 h-[calc(100vh-7rem)] transition-all duration-300 transform ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
