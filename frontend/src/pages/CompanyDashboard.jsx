@@ -340,6 +340,12 @@ function Applicants({ internshipId, search }) {
                   >
                     {a.name || 'Candidate'}
                   </span>
+                  {a.is_premium && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 text-[10px] font-black flex items-center gap-1 shadow-sm">
+                      <span>👑</span>
+                      <span>Premium Priority</span>
+                    </span>
+                  )}
                   {rankIdx === 0 && (
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[10px] font-bold">
                       ⭐ #1 Top Match

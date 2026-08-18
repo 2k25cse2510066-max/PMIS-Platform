@@ -152,9 +152,23 @@ export default function StudentDashboard() {
                     {avatarInitial}
                   </div>
                   <div>
-                    <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
-                      {greetingPrefix}{firstName ? `, ${firstName}` : ''}! 👋
-                    </h1>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                        {greetingPrefix}{firstName ? `, ${firstName}` : ''}! 👋
+                      </h1>
+                      {profile?.is_premium && (
+                        <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-[10px] tracking-wide uppercase flex items-center gap-1 shadow-md shadow-amber-500/30">
+                          <span>👑</span>
+                          <span>PMIS Premium</span>
+                        </span>
+                      )}
+                      {profile?.premium_status === 'pending' && (
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/30 text-amber-200 border border-amber-400/40 font-bold text-[10px] tracking-wide flex items-center gap-1 animate-pulse">
+                          <span>⏳</span>
+                          <span>Premium Pending Review</span>
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-indigo-100/90 mt-0.5 font-medium">
                       AI-powered internship matching, real-time application tracking, and skill gap analytics.
                     </p>

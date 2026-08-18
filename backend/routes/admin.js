@@ -123,4 +123,50 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
+// ==========================================
+// Admin Premium Service Verification
+// ==========================================
+const premiumStore = require('../services/premiumStore');
+
+router.get('/premium-requests', async (req, res) => {
+  try {
+    const requests = await premiumStore.getAllRequests();
+    res.json(requests);
+  } catch (err) {
+    console.error('Admin premium requests error:', err);
+    res.status(500).json({ error: 'Failed to fetch premium requests' });
+  }
+});
+
+router.put('/premium-requests/:userId/approve', async (req, res) => {
+  try {
+    const updated = await premiumStore.approve(req.params.userId);
+    res.json({ message: 'Premium service activated for candidate', record: updated });
+  } catch (err) {
+    console.error('Admin approve premium error:', err);
+    res.status(500).json({ error: 'Failed to activate premium' });
+  }
+});
+
+router.put('/premium-requests/:userId/reject', async (req, res) => {
+  try {
+    const { reason } = req.body;
+    const updated = await premiumStore.reject(req.params.userId, reason);
+    res.json({ message: 'Premium request declined', record: updated });
+  } catch (err) {
+    console.error('Admin reject premium error:', err);
+    res.status(500).json({ error: 'Failed to decline request' });
+  }
+});
+
+router.put('/premium-requests/:userId/revoke', async (req, res) => {
+  try {
+    const updated = await premiumStore.revoke(req.params.userId);
+    res.json({ message: 'Premium status revoked', record: updated });
+  } catch (err) {
+    console.error('Admin revoke premium error:', err);
+    res.status(500).json({ error: 'Failed to revoke premium' });
+  }
+});
+
 module.exports = router;

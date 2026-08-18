@@ -16,6 +16,7 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
   const [showSettings, setShowSettings] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [premiumStatus, setPremiumStatus] = useState('none');
 
   const [notifPrefs, setNotifPrefs] = useState(() => {
     const raw = localStorage.getItem('pmis_notif_prefs');
@@ -33,6 +34,12 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
           setUnreadCount(r.data.length);
         })
         .catch(() => {});
+
+      if (user.role === 'student') {
+        api.get('/student/premium/status')
+          .then((r) => setPremiumStatus(r.data?.status || 'none'))
+          .catch(() => {});
+      }
     }
   }, [user]);
 
@@ -124,11 +131,23 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
             {/* 👑 PREMIUM TIER BUTTON */}
             <button
               onClick={() => setShowPremiumModal(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold hover:from-amber-500/30 hover:to-purple-500/30 transition-all shadow-sm active:scale-95"
+              className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm active:scale-95 border ${
+                premiumStatus === 'active'
+                  ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 border-amber-400 shadow-amber-500/30'
+                  : premiumStatus === 'pending'
+                  ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border-amber-500/40 animate-pulse'
+                  : 'bg-gradient-to-r from-amber-500/20 to-purple-500/20 text-amber-700 dark:text-amber-300 border-amber-500/30 hover:from-amber-500/30 hover:to-purple-500/30'
+              }`}
               title="Explore Premium Features"
             >
               <span>👑</span>
-              <span>Premium</span>
+              <span>
+                {premiumStatus === 'active'
+                  ? 'Premium Active'
+                  : premiumStatus === 'pending'
+                  ? 'Review Pending'
+                  : 'Premium'}
+              </span>
             </button>
 
             {/* 1. NOTIFICATIONS 🔔 */}
@@ -386,6 +405,7 @@ export default function Navbar({ onToggleSidebar, search, onSearchChange }) {
       <PremiumModal
         isOpen={showPremiumModal}
         onClose={() => setShowPremiumModal(false)}
+        onStatusChange={setPremiumStatus}
       />
 
       {/* CHANGE PASSWORD MODAL */}

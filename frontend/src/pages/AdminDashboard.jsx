@@ -62,16 +62,21 @@ export default function AdminDashboard() {
 
         {/* Tab Navigation */}
         <div className="flex gap-2 p-1.5 glass-panel !rounded-2xl border-slate-200/90 dark:border-white/15 overflow-x-auto">
-          {['Overview', 'Companies', 'Students'].map((t) => (
+          {[
+            { id: 'Overview', label: '📊 System Analytics' },
+            { id: 'Companies', label: '🏢 Company Verification' },
+            { id: 'Students', label: '🎓 Student Verification' },
+            { id: 'Premium', label: '👑 Premium Approvals' },
+          ].map((t) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-5 py-2.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 ${tab === t
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`px-5 py-2.5 text-xs font-bold rounded-xl whitespace-nowrap transition-all duration-200 ${tab === t.id
                   ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/30'
                   : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10'
                 }`}
             >
-              {t === 'Overview' ? '📊 System Analytics' : t === 'Companies' ? '🏢 Company Verification' : '🎓 Student Verification'}
+              {t.label}
             </button>
           ))}
         </div>
@@ -79,6 +84,7 @@ export default function AdminDashboard() {
         {tab === 'Overview' && <Overview />}
         {tab === 'Companies' && <Companies search={search} />}
         {tab === 'Students' && <Students search={search} />}
+        {tab === 'Premium' && <PremiumApprovals search={search} />}
       </div>
     </div>
   );
@@ -259,3 +265,270 @@ function Students({ search }) {
     </div>
   );
 }
+
+function PremiumApprovals({ search }) {
+  const [requests, setRequests] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'pending' | 'active' | 'rejected'
+  const [actionLoading, setActionLoading] = useState(null);
+  const [rejectPromptUserId, setRejectPromptUserId] = useState(null);
+  const [rejectReason, setRejectReason] = useState('Incomplete skill or project portfolio');
+
+  const load = useCallback(() => {
+    api.get('/admin/premium-requests')
+      .then((r) => setRequests(r.data))
+      .catch(() => setRequests([]));
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  async function approve(userId) {
+    setActionLoading(userId);
+    try {
+      await api.put(`/admin/premium-requests/${userId}/approve`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to approve premium');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function reject(userId) {
+    setActionLoading(userId);
+    try {
+      await api.put(`/admin/premium-requests/${userId}/reject`, { reason: rejectReason });
+      setRejectPromptUserId(null);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to decline request');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function revoke(userId) {
+    if (!window.confirm('Are you sure you want to revoke Premium access for this candidate?')) return;
+    setActionLoading(userId);
+    try {
+      await api.put(`/admin/premium-requests/${userId}/revoke`);
+      load();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to revoke premium');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  if (!requests) {
+    return <div className="h-40 rounded-2xl bg-slate-200/60 dark:bg-white/5 animate-pulse border border-slate-300/60 dark:border-white/10" />;
+  }
+
+  const q = (search || '').toLowerCase();
+  const filtered = requests.filter((r) => {
+    const matchesSearch = (r.name || '').toLowerCase().includes(q) || (r.email || '').toLowerCase().includes(q);
+    if (!matchesSearch) return false;
+    if (filterStatus === 'all') return true;
+    return r.status === filterStatus;
+  });
+
+  const pendingCount = requests.filter((r) => r.status === 'pending').length;
+  const activeCount = requests.filter((r) => r.status === 'active').length;
+
+  return (
+    <div className="space-y-4">
+      {/* Header with Stats & Export */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="font-display text-lg text-slate-900 dark:text-white font-bold">
+              👑 Premium Candidate Approvals ({filtered.length})
+            </h2>
+            {pendingCount > 0 && (
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[11px] font-mono font-bold animate-pulse">
+                {pendingCount} Pending Review
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">
+            Verify and activate scheme premium tier privileges (priority ranking, unlimited ATS parser, and AI Career Mentor).
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex bg-slate-200/70 dark:bg-white/10 p-1 rounded-xl text-xs font-bold">
+            <button
+              onClick={() => setFilterStatus('all')}
+              className={`px-3 py-1 rounded-lg transition-all ${filterStatus === 'all' ? 'bg-white dark:bg-white/20 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
+            >
+              All ({requests.length})
+            </button>
+            <button
+              onClick={() => setFilterStatus('pending')}
+              className={`px-3 py-1 rounded-lg transition-all ${filterStatus === 'pending' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
+            >
+              Pending ({pendingCount})
+            </button>
+            <button
+              onClick={() => setFilterStatus('active')}
+              className={`px-3 py-1 rounded-lg transition-all ${filterStatus === 'active' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}`}
+            >
+              Active ({activeCount})
+            </button>
+          </div>
+
+          <button
+            onClick={() => exportToCSV('pmis_premium_candidates.csv', requests.map((r) => ({
+              Name: r.name,
+              Email: r.email,
+              Phone: r.phone || '',
+              Location: r.location || '',
+              CGPA: r.cgpa || '',
+              Plan: r.plan || 'PMIS Early Access Pro',
+              Status: r.status,
+              RequestedAt: r.requested_at || '',
+              ActivatedAt: r.activated_at || '',
+              Note: r.note || '',
+            })))}
+            className="btn-secondary text-xs !py-1.5 !px-3"
+          >
+            📥 Export CSV
+          </button>
+        </div>
+      </div>
+
+      {/* Requests List */}
+      {filtered.length === 0 ? (
+        <div className="glass-card p-8 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+          No premium requests found matching your filter.
+        </div>
+      ) : (
+        <div className="glass-card divide-y divide-slate-200 dark:divide-white/10 border-slate-200/90 dark:border-white/15">
+          {filtered.map((r) => (
+            <div key={r.id || r.user_id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:bg-slate-50/50 dark:hover:bg-white/[0.02]">
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <span className="font-display font-extrabold text-slate-900 dark:text-white text-base">
+                    {r.name || 'Candidate'}
+                  </span>
+                  <span className="text-xs text-slate-500 font-mono">({r.email})</span>
+                  
+                  {r.status === 'active' && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                      <span>✔</span> Active Premium
+                    </span>
+                  )}
+                  {r.status === 'pending' && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                      <span>⏳</span> Verification Pending
+                    </span>
+                  )}
+                  {r.status === 'rejected' && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 text-[10px] font-bold uppercase tracking-wider">
+                      ✕ Declined
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300 flex-wrap">
+                  {r.cgpa && <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">CGPA: {r.cgpa}</span>}
+                  {r.location && <span>📍 {r.location}</span>}
+                  {r.phone && <span>📞 {r.phone}</span>}
+                  <span className="text-slate-400 font-mono text-[11px]">
+                    Requested: {r.requested_at ? new Date(r.requested_at).toLocaleDateString() : 'Recent'}
+                  </span>
+                </div>
+
+                {r.note && (
+                  <div className="text-xs bg-slate-100 dark:bg-white/5 p-2 rounded-xl text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 max-w-xl">
+                    <span className="font-bold text-slate-500">Applicant Note: </span>
+                    <span>"{r.note}"</span>
+                  </div>
+                )}
+
+                {r.skills && r.skills.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {r.skills.slice(0, 5).map((sk) => (
+                      <span key={sk} className="chip text-[10px] !py-0.5">{sk}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                {r.status === 'pending' && (
+                  <>
+                    <button
+                      onClick={() => approve(r.user_id)}
+                      disabled={actionLoading === r.user_id}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-xs font-black shadow-lg shadow-amber-500/25 hover:from-amber-600 hover:to-orange-600 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      <span>👑</span>
+                      <span>{actionLoading === r.user_id ? 'Activating...' : 'Approve & Activate'}</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => setRejectPromptUserId(r.user_id)}
+                      disabled={actionLoading === r.user_id}
+                      className="btn-secondary text-xs !py-2 !px-3 text-rose-600 hover:bg-rose-500/10"
+                    >
+                      Decline
+                    </button>
+                  </>
+                )}
+
+                {r.status === 'active' && (
+                  <button
+                    onClick={() => revoke(r.user_id)}
+                    disabled={actionLoading === r.user_id}
+                    className="btn-secondary text-xs !py-1.5 !px-3 text-slate-500 hover:text-rose-600"
+                  >
+                    Revoke Status
+                  </button>
+                )}
+
+                {r.status === 'rejected' && (
+                  <button
+                    onClick={() => approve(r.user_id)}
+                    disabled={actionLoading === r.user_id}
+                    className="btn-secondary text-xs !py-1.5 !px-3 text-amber-600"
+                  >
+                    Re-Approve
+                  </button>
+                )}
+              </div>
+
+              {/* Quick Decline Reason Modal / Form */}
+              {rejectPromptUserId === r.user_id && (
+                <div className="w-full mt-3 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex flex-col sm:flex-row items-center gap-2">
+                  <input
+                    type="text"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Enter reason for declining..."
+                    className="input text-xs flex-1"
+                  />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => reject(r.user_id)}
+                      className="px-3 py-1.5 rounded-xl bg-rose-600 text-white text-xs font-bold shadow"
+                    >
+                      Confirm Decline
+                    </button>
+                    <button
+                      onClick={() => setRejectPromptUserId(null)}
+                      className="btn-secondary text-xs !py-1.5"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+

@@ -5,6 +5,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const { computeMatch } = require('../services/matching');
 const interviewStore = require('../services/interviewStore');
 const googleCalendarService = require('../services/googleCalendarService');
+const premiumStore = require('../services/premiumStore');
 
 const router = express.Router();
 router.use(requireAuth, requireRole('company'));
@@ -142,9 +143,10 @@ router.get('/internships/:id/applicants', async (req, res) => {
       if (data?.signedUrl) resumeUrls.set(filename, data.signedUrl);
     }
 
-    const ranked = (apps || []).map((a) => {
+    const ranked = await Promise.all((apps || []).map(async (a) => {
       const s = studentsById.get(a.student_id) || {};
       const studentEmail = userEmailMap.get(a.student_id) || '';
+      const premiumInfo = await premiumStore.getStatus(a.student_id);
       const student = {
         skills: s.skills || [],
         projects: s.projects || [],
@@ -169,12 +171,15 @@ router.get('/internships/:id/applicants', async (req, res) => {
         resume_text: s.resume_text || '',
         resume_url: s.resume_filename ? resumeUrls.get(s.resume_filename) || null : null,
         ats_score: computeAtsScore(s),
+        is_premium: premiumInfo.is_premium,
+        premium_status: premiumInfo.status,
         status: a.status,
         applied_at: a.applied_at,
         match,
       };
-    }).sort((x, y) => y.match.overall - x.match.overall);
+    }));
 
+    ranked.sort((x, y) => y.match.overall - x.match.overall);
     res.json(ranked);
   } catch (err) {
     console.error('Applicants error:', err);

@@ -8,6 +8,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const { computeMatch, gapAnalysis, extractSkillsFromText, normalizeSkillList } = require('../services/matching');
 const { parseResumeBuffer } = require('../services/resumeParser');
 const interviewStore = require('../services/interviewStore');
+const premiumStore = require('../services/premiumStore');
 
 const router = express.Router();
 router.use(requireAuth, requireRole('student'));
@@ -29,11 +30,17 @@ async function loadProfile(userId) {
     .eq('user_id', userId)
     .maybeSingle();
   if (!row) return null;
+  const premiumInfo = await premiumStore.getStatus(userId);
   return {
     ...row,
     skills: row.skills || [],
     projects: row.projects || [],
     certificates: row.certificates || [],
+    is_premium: premiumInfo.is_premium,
+    premium_status: premiumInfo.status,
+    premium_plan: premiumInfo.plan,
+    premium_requested_at: premiumInfo.requested_at,
+    premium_activated_at: premiumInfo.activated_at,
   };
 }
 
@@ -433,6 +440,35 @@ router.post('/chatbot', async (req, res) => {
   } catch (err) {
     console.error('Chatbot LLM Error:', err);
     res.status(500).json({ error: 'AI Assistant processing error' });
+  }
+});
+
+// Premium Service Endpoints
+router.post('/premium/request', async (req, res) => {
+  try {
+    const { email, note, plan } = req.body;
+    const { data: user } = await supabase.from('users').select('email').eq('id', req.user.id).maybeSingle();
+    const profile = await loadProfile(req.user.id);
+    const result = await premiumStore.createOrUpdateRequest({
+      userId: req.user.id,
+      email: email || user?.email,
+      name: profile?.name,
+      plan: plan || 'PMIS Early Access Pro',
+      note: note || '',
+    });
+    res.json({ message: 'Premium request submitted successfully', request: result });
+  } catch (err) {
+    console.error('Premium request error:', err);
+    res.status(500).json({ error: 'Failed to submit premium request' });
+  }
+});
+
+router.get('/premium/status', async (req, res) => {
+  try {
+    const status = await premiumStore.getStatus(req.user.id);
+    res.json(status);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch premium status' });
   }
 });
 
