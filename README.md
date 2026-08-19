@@ -98,6 +98,28 @@ Open **http://localhost:5173** in your browser. The Vite dev server proxies
 `/api` and `/uploads` requests to the backend automatically — no extra config
 needed.
 
+### 4. Android App (Capacitor)
+
+The mobile application is bundled with Capacitor.
+
+To build and sync the Android assets:
+```bash
+cd frontend
+npm run cap:build
+```
+
+To build the debug APK directly:
+```bash
+npm run cap:apk
+```
+The generated APK will be available at:
+`frontend/android/app/build/outputs/apk/debug/app-debug.apk`
+
+To open the project in Android Studio (for emulator, USB debugging, or release signing):
+```bash
+npm run cap:open
+```
+
 ### Demo accounts (created by `npm run seed`)
 
 | Role     | Email                        | Password    | Notes                        |

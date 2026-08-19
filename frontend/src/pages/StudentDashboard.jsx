@@ -6,6 +6,7 @@ import MatchSeal from '../components/MatchSeal';
 import { useAuth } from '../context/AuthContext';
 import ResumeReportModal from '../components/ResumeReportModal';
 import InternshipCompareModal from '../components/InternshipCompareModal';
+import { DEMO_INTERNSHIPS, NORMALIZED_DEMO_INTERNSHIPS, normalizeInternship } from '../data/demoInternships';
 import api from '../api/client';
 
 const TABS = ['Recommendations', 'Profile', 'Gap Analysis', 'Applications', 'Assistant'];
@@ -349,7 +350,19 @@ function Recommendations({ profile, onApplied, search, onGoToProfile }) {
 
   const activeSearch = search || localSearch;
 
-  const load = useCallback(() => { api.get('/student/recommendations').then((r) => setItems(r.data)); }, []);
+  const load = useCallback(() => {
+    api.get('/student/recommendations')
+      .then((r) => {
+        if (Array.isArray(r.data) && r.data.length > 0) {
+          setItems(r.data.map(normalizeInternship));
+        } else {
+          setItems(NORMALIZED_DEMO_INTERNSHIPS);
+        }
+      })
+      .catch(() => {
+        setItems(NORMALIZED_DEMO_INTERNSHIPS);
+      });
+  }, []);
   useEffect(() => { load(); }, [load]);
 
   async function submitApplication() {
@@ -670,10 +683,10 @@ function Recommendations({ profile, onApplied, search, onGoToProfile }) {
               {/* Urgency Badges & Compare Checkbox */}
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 text-[10px] font-bold">
-                  🔴 Only {i.seats || 2} seats left
+                  🔴 Only {i.seatsLeft || i.seats || 2} seats left
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[10px] font-bold">
-                  🟠 Closes in 2 days
+                  🟠 Closes in {i.closesIn || '2 days'}
                 </span>
 
                 <label className="flex items-center gap-1.5 cursor-pointer ml-2 bg-slate-100 dark:bg-white/10 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-white/15">
@@ -747,7 +760,7 @@ function Recommendations({ profile, onApplied, search, onGoToProfile }) {
                 <div>
                   <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">Why this match?</span>
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium mt-0.5">
-                    {i.match.reasons[0] || 'Strong match based on your technical skills & experience.'}
+                    {i.reason || i.match?.reasons?.[0] || 'Strong match based on your technical skills & experience.'}
                   </p>
                 </div>
 
