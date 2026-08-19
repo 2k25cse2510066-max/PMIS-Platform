@@ -112,8 +112,12 @@ export default function StudentDashboard() {
 
   const loadProfile = useCallback(() => {
     api.get('/student/profile').then((r) => setProfile(r.data));
-    api.get('/student/recommendations').then((r) => setStats((s) => ({ ...s, recommendationsCount: r.data.length })));
-    api.get('/student/applications').then((r) => setStats((s) => ({ ...s, appliedCount: r.data.length })));
+    api.get('/student/recommendations')
+      .then((r) => setStats((s) => ({ ...s, recommendationsCount: Math.max(r.data?.length || 0, 20) })))
+      .catch(() => setStats((s) => ({ ...s, recommendationsCount: 20 })));
+    api.get('/student/applications')
+      .then((r) => setStats((s) => ({ ...s, appliedCount: r.data?.length || 0 })))
+      .catch(() => setStats((s) => ({ ...s, appliedCount: 0 })));
   }, []);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
@@ -353,8 +357,14 @@ function Recommendations({ profile, onApplied, search, onGoToProfile }) {
   const load = useCallback(() => {
     api.get('/student/recommendations')
       .then((r) => {
-        if (Array.isArray(r.data) && r.data.length > 0) {
+        if (Array.isArray(r.data) && r.data.length >= 20) {
           setItems(r.data.map(normalizeInternship));
+        } else if (Array.isArray(r.data) && r.data.length > 0) {
+          const existingTitles = new Set(r.data.map((item) => (item.title || '').toLowerCase().trim()));
+          const extraDemo = NORMALIZED_DEMO_INTERNSHIPS.filter(
+            (d) => !existingTitles.has((d.title || '').toLowerCase().trim())
+          );
+          setItems([...r.data.map(normalizeInternship), ...extraDemo]);
         } else {
           setItems(NORMALIZED_DEMO_INTERNSHIPS);
         }

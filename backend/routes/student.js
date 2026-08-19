@@ -176,7 +176,7 @@ router.get('/recommendations', async (req, res) => {
       };
     }).sort((a, b) => b.match.overall - a.match.overall);
 
-    res.json(ranked.slice(0, 10));
+    res.json(ranked);
   } catch (err) {
     console.error('Recommendations error:', err);
     res.status(500).json({ error: 'Failed to fetch recommendations' });
